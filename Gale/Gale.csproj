@@ -6,14 +6,24 @@
     <Company />
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Audio.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Data\Img\Gale_Dribble.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Box2DX" Version="2.0.2" />
+    <PackageReference Include="NAudio" Version="1.8.0" />
     <PackageReference Include="OpenTK" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Audio.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Gale.Display\Gale.Display.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="ImageResources.Designer.cs">
@@ -21,11 +31,20 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
+    <Compile Update="ShaderResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ShaderResources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="ImageResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ImageResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="ShaderResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ShaderResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -39,6 +58,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Data\Img\woodfloor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Prop\office_table.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Room\Office\backdrop.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Severe_Tire_Damage.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\goblin_64.png">

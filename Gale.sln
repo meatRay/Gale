@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gale", "Gale\Gale.csproj", "{0E76F874-7E0D-4BF9-AC02-AE244C52DA4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gale.LScripts", "Gale.LScripts\Gale.LScripts.csproj", "{3D1B0DD7-8306-4848-A3BA-BA169B73162B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gale.Display", "Gale.Display\Gale.Display.csproj", "{D12CFFCD-92FB-4342-ADF4-540AA15AC388}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{0E76F874-7E0D-4BF9-AC02-AE244C52DA4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E76F874-7E0D-4BF9-AC02-AE244C52DA4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E76F874-7E0D-4BF9-AC02-AE244C52DA4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D1B0DD7-8306-4848-A3BA-BA169B73162B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D1B0DD7-8306-4848-A3BA-BA169B73162B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D1B0DD7-8306-4848-A3BA-BA169B73162B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D1B0DD7-8306-4848-A3BA-BA169B73162B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D12CFFCD-92FB-4342-ADF4-540AA15AC388}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D12CFFCD-92FB-4342-ADF4-540AA15AC388}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D12CFFCD-92FB-4342-ADF4-540AA15AC388}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D12CFFCD-92FB-4342-ADF4-540AA15AC388}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
