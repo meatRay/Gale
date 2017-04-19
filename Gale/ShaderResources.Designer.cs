@@ -86,12 +86,16 @@ namespace Gale {
         ///   Looks up a localized string similar to #version 400
         ///in vec2 UV;
         ///uniform sampler2D texture;
+        ///uniform float music;
         ///
         ///out vec4 frag_colour;
         ///
+        ///vec4 hold;
+        ///
         ///void main() {
         ///	//frag_colour = vec4(UV.x, UV.y, 0.0f, 1.0f);
-        ///	frag_colour = texture( texture, UV );
+        ///	hold = texture( texture, UV );
+        ///	frag_colour = vec4(hold.x, hold.y - music, hold.z - music, hold.w);
         ///}.
         /// </summary>
         internal static string default_frag_shader {

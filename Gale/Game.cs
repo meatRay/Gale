@@ -5,20 +5,31 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Box2DX.Collision;
+using Box2DX.Common;
+using Box2DX.Dynamics;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Input;
 
 namespace Gale
 {
-    class Game
-    {
+	class Game
+	{
+		public World PhysicsContext;
+		public AABB AABBBounds;
 		public Prop Player;
 		public Render Display;
 		public Sprite Backdrop;
 		public List<Prop> Props;
 		public Vector2 Camera;
+
+		public Game()
+		{
+			AABBBounds = new AABB() { LowerBound = new Vec2(-100.0f, -100.0f), UpperBound = new Vec2(100.0f, 100.0f) };
+			PhysicsContext = new World(AABBBounds, new Vec2(0.0f, 0.0f), false);
+		}
+
 		protected void OnMouseDown( MouseButtonEventArgs e )
 		{
 			var pos = new Vector4(
@@ -27,7 +38,7 @@ namespace Gale
 				0.0f, 1.0f);
 			Player.MoveTo((inv_proj * pos).Xy + Camera);
 		}
-		public void Update(double delta_time)
+		public void Update( double delta_time )
 		{
 			foreach (var prop in Props)
 				prop.Update(delta_time);
@@ -80,12 +91,17 @@ namespace Gale
 					render.ShaderProgram = Shader.CompileFrom(vert, frag);
 				var sprite = Sprite.FromFile("Data/Character/Gale_Dribble.png", render.ShaderProgram);
 				var sprite2 = Sprite.FromFile("Data/Prop/office_table.png", render.ShaderProgram);
-				// = Sprite.FromFile("Data/Room/Office/backdrop.png", render.ShaderProgram);
-				/*render.Props = new List<Prop>() {
-					new Prop(render.PhysicsContext, sprite,100.0f / Sprite.TileSize, 1.0f) { Context = render },
-					new Prop(render.PhysicsContext, sprite2,0.0f / Sprite.TileSize, 10.0f) { Context = render } };*/
+				var game = new Game();
+				game.Backdrop = Sprite.FromFile("Data/Room/Office/backdrop.png", render.ShaderProgram);
+				render.UpdateFrame += ( s, e ) => game.Update(e.Time);
+				render.MouseDown += ( s, e ) => game.OnMouseDown(e);
+				render.RenderFrame += ( s, e ) => game.Render();
+				game.Display = render;
+				game.Props = new List<Prop>() {
+					new Prop(game.PhysicsContext, sprite,100.0f / Sprite.TileSize, 1.0f) { Context = render },
+					new Prop(game.PhysicsContext, sprite2,0.0f / Sprite.TileSize, 10.0f) { Context = render } };
 				render.VSync = VSyncMode.Off;
-				//render.Player = render.Props[0];
+				game.Player = game.Props[0];
 				//var contxt = new OpenTK.Audio.AudioContext();
 				//render.rdr = new SineWaveProvider32() { Frequency = 1000, Amplitude = 0.25f };
 				//render.rdr.SetWaveFormat(16000, 1);
@@ -98,9 +114,6 @@ namespace Gale
 				//	render.cap.StartRecording();
 				//	ply.Play();
 				//	render.cap.StopRecording();
-				var game = new Game();
-				render.UpdateFrame += ( s, e ) => game.Update(e.Time);
-				render.MouseDown += ( s, e ) => game.OnMouseDown(e);
 				render.Run(60);
 				//}
 			}

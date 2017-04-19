@@ -59,9 +59,6 @@
   <ItemGroup>
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
-    <None Include="Shader\3d_vert_shader.vert" />
-    <None Include="Shader\default_frag_shader.frag" />
-    <None Include="Shader\default_vert_shader.vert" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

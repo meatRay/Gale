@@ -28,12 +28,8 @@ namespace Gale
 				4, // OpenGL major version
 				4, // OpenGL minor version
 				GraphicsContextFlags.ForwardCompatible)
-		{
-			AABBBounds = new AABB() { LowerBound = new Vec2(-100.0f, -100.0f), UpperBound = new Vec2(100.0f, 100.0f) };
-			PhysicsContext = new World(AABBBounds, new Vec2(0.0f, 0.0f), false);
-		}
-		public World PhysicsContext;
-		public AABB AABBBounds;
+		{ }
+
 		public Shader ShaderProgram;
 		public List<IRender> Effects;
 		protected override void OnLoad( EventArgs e )
@@ -62,7 +58,7 @@ namespace Gale
 		{
 			GL.Viewport(0, 0, Width, Height);
 		}
-		
+
 		//public SineWaveProvider32 rdr;
 		public WasapiLoopbackCapture cap;
 		private float _music;

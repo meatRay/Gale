@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Box2DX.Collision;
+using Box2DX.Common;
+using Box2DX.Dynamics;
+using OpenTK;
+using OpenTK.Graphics.OpenGL4;
 
 namespace Gale
 {
