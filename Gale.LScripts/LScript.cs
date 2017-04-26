@@ -14,18 +14,18 @@ namespace Gale.LScripts
 			Word = word;
 		}
 		
-		public static ComplexRune CreateFrom( string input, string file_name )
+		public static ComplexLS CreateFrom( string input, string file_name )
 		{
 			RuneParser = new Parser(new Scanner());
 			var tree = RuneParser.Parse(input, file_name);
-			return tree.Eval(null) as ComplexRune;
+			return tree.Eval(null) as ComplexLS;
 		}
 
 		private static Parser RuneParser;
 	}
-	public class TokenRune : LScript
+	public class TokenLS : LScript
 	{
-		public TokenRune(string r_name, object token)
+		public TokenLS(string r_name, object token)
 			: base(r_name)
 		{
 			_token = token;
@@ -35,10 +35,10 @@ namespace Gale.LScripts
 
 		private object _token;
 	}
-	public class ComplexRune : LScript
+	public class ComplexLS : LScript
 	{
 		public LScript[] SubRunes { get; private set; }
-		public ComplexRune(string word, LScript[] subrunes)
+		public ComplexLS(string word, LScript[] subrunes)
 			: base(word)
 		{
 			SubRunes = subrunes;

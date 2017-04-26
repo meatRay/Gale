@@ -1,0 +1,42 @@
+﻿ROOM:
+	BACKDROP: FILENAME "Img/Room/Office/backdrop.png" ;
+	PROPS:
+		PROP:
+			TEMPLATE:
+				SPRITE: 
+				FILENAME "Img/Character/Gale_Dribble.png" 
+				DEPTH "18px" ;
+			;
+			X 0.0 Y 0.0 
+			MASS 1.0 
+			COLLIDES; 
+			CANMOVE; 
+			PLAYER;
+		;
+
+		PROP:
+			TEMPLATE:
+				SPRITE: FILENAME "Img/Room/Office/crate.png" DEPTH "30px" ;
+			;
+			X 5.0 Y 5.0 MASS 10.0 CANMOVE; COLLIDES;
+		;
+		PROP:
+			TEMPLATE:
+				SPRITE: FILENAME "Img/Prop/office_table.png" DEPTH "64px" ;
+			;
+			X 8.0 Y 2.0 MASS 10.0 CANMOVE; COLLIDES;
+		;
+		PROP:
+			TEMPLATE:
+				SPRITE: FILENAME "Img/Room/Office/office_chair.png" DEPTH "24px" ;
+			;
+			X 0.0 Y 3.0 MASS 0.2 CANMOVE; COLLIDES;
+		;
+		PROP:
+			TEMPLATE:
+				SPRITE: FILENAME "Img/Room/Office/frontdrop.png" DEPTH "100px" ;
+			;
+			X 0.0 Y 0.0 MASS 0.0 COLLIDES;
+		;
+	;
+;

@@ -207,7 +207,7 @@ namespace Gale.LScripts.TinyPG
 
         protected virtual object EvalStart(ParseTree tree, params object[] paramlist)
         {
-			return new ComplexRune("Rune",
+			return new ComplexLS("LScript",
 					Nodes.Where(n => n.Token.Type == TokenType.Item)
 					.Select(i => i.Eval(tree, paramlist) as LScript)
 					.ToArray());
@@ -230,13 +230,15 @@ namespace Gale.LScripts.TinyPG
 				var atom = val.Nodes.First();
 				if (atom.Token.Type == TokenType.NUMBER)
 					token = int.Parse(atom.Token.Text);
-				else
+                else if (atom.Token.Type == TokenType.DOUBLE)
+                    token = double.Parse(atom.Token.Text);
+                else
 					token = atom.Token.Text.Substring(1, atom.Token.Text.Length - 2);
-				return new TokenRune(r_name, token);
+				return new TokenLS(r_name, token);
 			}
 			else if (val.Token.Type == TokenType.Group)
 			{
-				return new ComplexRune(r_name,
+				return new ComplexLS(r_name,
 					val.Nodes.Where(n => n.Token.Type == TokenType.Item)
 					.Select(i => i.Eval(tree, paramlist) as LScript)
 					.ToArray());

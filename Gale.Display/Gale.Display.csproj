@@ -54,7 +54,7 @@
     <Compile Include="Shader\Shader.cs" />
     <Compile Include="Shader\Shader.Step.cs" />
     <Compile Include="Sprite.cs" />
-    <Compile Include="Window.cs" />
+    <Compile Include="Render.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="OpenTK.dll.config" />

@@ -64,6 +64,10 @@ namespace Gale.LScripts.TinyPG
             Patterns.Add(TokenType.NUMBER, regex);
             Tokens.Add(TokenType.NUMBER);
 
+            regex = new Regex(@"\d+.\d+", RegexOptions.Compiled);
+            Patterns.Add(TokenType.DOUBLE, regex);
+            Tokens.Add(TokenType.DOUBLE);
+
             regex = new Regex(@"\w+", RegexOptions.Compiled);
             Patterns.Add(TokenType.WORD, regex);
             Tokens.Add(TokenType.WORD);
@@ -252,7 +256,8 @@ namespace Gale.LScripts.TinyPG
             NUMBER  = 13,
             WORD    = 14,
             META    = 15,
-            WHITESPACE= 16
+            WHITESPACE= 16,
+            DOUBLE = 17
     }
 
     public class Token

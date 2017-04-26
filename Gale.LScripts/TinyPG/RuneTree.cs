@@ -32,11 +32,11 @@ namespace Gale.LScripts.TinyPG
 					token = double.Parse(atom.Text);
 				else
 					token = atom.Text.Substring(1, atom.Text.Length - 2);
-				return new TokenRune(r_name, token);
+				return new TokenLS(r_name, token);
 			}
 			else if (val.Token.Type == TokenType.Group)
 			{
-				new ComplexRune(r_name,
+				new ComplexLS(r_name,
 					val.Nodes.Where(n => n.Token.Type == TokenType.Item)
 					.Select(i => i.Eval(tree, paramlist) as LScript)
 					.ToArray());

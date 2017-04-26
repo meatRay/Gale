@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
     <Authors>meatRay</Authors>
     <Company />
   </PropertyGroup>
@@ -9,12 +9,10 @@
     <Compile Remove="Audio.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Data\Img\Gale_Dribble.png" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Box2DX" Version="2.0.2" />
     <PackageReference Include="NAudio" Version="1.8.0" />
     <PackageReference Include="OpenTK" Version="2.0.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
@@ -24,6 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Gale.Display\Gale.Display.csproj" />
+    <ProjectReference Include="..\Gale.LScripts\Gale.LScripts.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="ImageResources.Designer.cs">
@@ -63,7 +62,16 @@
     <None Update="Data\Prop\office_table.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Data\Room.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Data\Room\Office\backdrop.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Room\Office\crate.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Room\Office\frontdrop.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Data\Severe_Tire_Damage.wav">

@@ -59,15 +59,5 @@ namespace Gale {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap Data_Character_Gale_Dribble {
-            get {
-                object obj = ResourceManager.GetObject("Data_Character_Gale_Dribble", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }

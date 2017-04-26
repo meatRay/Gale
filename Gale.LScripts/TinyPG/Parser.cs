@@ -145,12 +145,13 @@ namespace Gale.LScripts.TinyPG
             ParseNode node = parent.CreateNode(scanner.GetToken(TokenType.Value), "Value");
             parent.Nodes.Add(node);
 
-            tok = scanner.LookAhead(TokenType.WORD, TokenType.QUOTE, TokenType.NUMBER, TokenType.SOPEN, TokenType.SCLOSE);
+            tok = scanner.LookAhead(TokenType.WORD, TokenType.QUOTE, TokenType.NUMBER, TokenType.DOUBLE, TokenType.SOPEN, TokenType.SCLOSE);
             switch (tok.Type)
             {
                 case TokenType.WORD:
                 case TokenType.QUOTE:
                 case TokenType.NUMBER:
+                case TokenType.DOUBLE:
                     ParseAtom(node);
                     break;
                 case TokenType.SOPEN:
@@ -182,7 +183,7 @@ namespace Gale.LScripts.TinyPG
             ParseNode node = parent.CreateNode(scanner.GetToken(TokenType.Atom), "Atom");
             parent.Nodes.Add(node);
 
-            tok = scanner.LookAhead(TokenType.WORD, TokenType.QUOTE, TokenType.NUMBER);
+            tok = scanner.LookAhead(TokenType.WORD, TokenType.QUOTE, TokenType.NUMBER, TokenType.DOUBLE);
             switch (tok.Type)
             {
                 case TokenType.WORD:
@@ -212,6 +213,17 @@ namespace Gale.LScripts.TinyPG
                     node.Nodes.Add(n);
                     if (tok.Type != TokenType.NUMBER) {
                         tree.Errors.Add(new ParseError("Unexpected token '" + tok.Text.Replace("\n", "") + "' found. Expected " + TokenType.NUMBER.ToString(), 0x1001, tok));
+                        return;
+                    }
+                    break;
+                case TokenType.DOUBLE:
+                    tok = scanner.Scan(TokenType.DOUBLE);
+                    n = node.CreateNode(tok, tok.ToString());
+                    node.Token.UpdateRange(tok);
+                    node.Nodes.Add(n);
+                    if (tok.Type != TokenType.DOUBLE)
+                    {
+                        tree.Errors.Add(new ParseError("Unexpected token '" + tok.Text.Replace("\n", "") + "' found. Expected " + TokenType.DOUBLE.ToString(), 0x1001, tok));
                         return;
                     }
                     break;
