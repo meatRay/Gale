@@ -48,7 +48,7 @@ namespace Gale
 
         protected void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.Button == MouseButton.Button1)
+            if (e.Button == MouseButton.Left)
             {
                 var pos = new Vector4(
                     (e.X - (Display.Width * 0.5f)) / (Display.Width * 0.5f),
@@ -56,21 +56,23 @@ namespace Gale
                     0.0f, 1.0f);
                 Player.MoveTo((inv_proj * pos).Xy + Camera);
             }
-            else if (e.Button == MouseButton.Button3)
+            else if (e.Button == MouseButton.Right)
             {
-                var pos = new Vec2(
+                var pos = ((inv_proj * new Vector4(
                     (e.X - (Display.Width * 0.5f)) / (Display.Width * 0.5f),
-                    -((e.Y - (Display.Height * 0.5f)) / (Display.Height * 0.5f))) + Camera.CreateVec2();
+                    -((e.Y - (Display.Height * 0.5f)) / (Display.Height * 0.5f)),
+                    0.0f, 1.0f)).Xy + Camera).CreateVec2();
                 Prop f_prop = null;
                 foreach (var prop in ActiveLevel.Props.All)
-                    if( prop.PhysicsShape.TestPoint(XForm.Identity, pos))
+                    if (prop.PhysicsShape.TestPoint(prop.Physics.GetXForm(), pos))
                     {
                         f_prop = prop;
                         break;
                     }
-                if( f_prop != null )
+                if (f_prop != null)
                 {
-
+                    var f_pos = f_prop.GetPosition();
+                    Console.WriteLine($"{f_prop.Name}: {f_pos.X}, {f_pos.Y}");
                 }
             }
         }
@@ -127,8 +129,6 @@ namespace Gale
 
                     var script = LScript.CreateFrom(File.ReadAllText("Data/Room.txt"), "Data/Room.txt");
                     game.ActiveLevel = game.Content.MakeLevel(script.Read<ComplexLS>("ROOM"));
-
-                    game.Player = game.ActiveLevel.Props.All.First();
                     render.Run(60);
                 }
             }

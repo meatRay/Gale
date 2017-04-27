@@ -3,11 +3,13 @@
 	PROPS:
 		PROP:
 			TEMPLATE:
+				NAME "Gale Dribble"
 				SPRITE: 
-				FILENAME "Img/Character/Gale_Dribble.png" 
-				DEPTH "18px" ;
+					FILENAME "Img/Character/Gale_Dribble.png" 
+					DEPTH "18px" 
+				;
 			;
-			X 0.0 Y 0.0 
+			X 8.45 Y 6.80 
 			MASS 1.0 
 			COLLIDES; 
 			CANMOVE; 
@@ -16,21 +18,31 @@
 
 		PROP:
 			TEMPLATE:
+				NAME "storage crate"
 				SPRITE: FILENAME "Img/Room/Office/crate.png" DEPTH "30px" ;
 			;
-			X 5.0 Y 5.0 MASS 10.0 CANMOVE; COLLIDES;
+			X 5.84 Y 8.08 MASS 10.0 CANMOVE; COLLIDES;
 		;
 		PROP:
 			TEMPLATE:
+				NAME "foldout table"
 				SPRITE: FILENAME "Img/Prop/office_table.png" DEPTH "64px" ;
 			;
-			X 8.0 Y 2.0 MASS 10.0 CANMOVE; COLLIDES;
+			X 6.50 Y 5.73 MASS 10.0 COLLIDES;
 		;
 		PROP:
 			TEMPLATE:
+				NAME "bookcase"
+				SPRITE: FILENAME "Img/Room/Office/bookcase.png" DEPTH "48px" ;
+			;
+			X 3.77 Y 12.19 MASS 50.0 COLLIDES;
+		;
+		PROP:
+			TEMPLATE:
+				NAME "wheelie-chair"
 				SPRITE: FILENAME "Img/Room/Office/office_chair.png" DEPTH "24px" ;
 			;
-			X 0.0 Y 3.0 MASS 0.2 CANMOVE; COLLIDES;
+			X 7.45 Y 6.73 MASS 0.2 CANMOVE; COLLIDES;
 		;
 		PROP:
 			TEMPLATE:

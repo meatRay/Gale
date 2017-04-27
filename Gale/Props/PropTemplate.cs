@@ -9,11 +9,13 @@ namespace Gale.Props
     class PropTemplate
     {
         public float ZPosition = 0.0f;
-        public Sprite Image;
+        public Sprite Image { get; private set; }
+        public string Name { get; private set; }
 
-        public PropTemplate(Sprite image)
+        public PropTemplate(Sprite image, string name)
         {
             Image = image;
+            Name = name;
         }
 
 

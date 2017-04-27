@@ -24,7 +24,9 @@ namespace Gale
         public PropTemplate MakePropTemplate(ComplexLS template_script)
         {
             var sprt = LevelContext.Context.Content.MakeSprite(template_script.Read<ComplexLS>("SPRITE"));
-            return new PropTemplate(sprt);
+            var name_s = template_script.Read<TokenLS>("NAME");
+            string name = name_s != null ? name_s.Read<string>() : "UNKNOWN";
+            return new PropTemplate(sprt, name);
         }
 
         public Prop SpawnProp(ComplexLS prop_script)
