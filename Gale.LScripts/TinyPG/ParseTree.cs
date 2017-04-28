@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 
@@ -17,7 +16,6 @@ namespace Gale.LScripts.TinyPG
     [Serializable]
     public class ParseError
     {
-        private string file;
         private string message;
         private int code;
         private int line;
@@ -25,7 +23,6 @@ namespace Gale.LScripts.TinyPG
         private int pos;
         private int length;
 
-        public string File { get { return file; } }
         public int Code { get { return code; } }
         public int Line { get { return line; } }
         public int Column { get { return col; } }
@@ -38,21 +35,12 @@ namespace Gale.LScripts.TinyPG
         {
         }
 
-        public ParseError(string message, int code, ParseNode node) : this(message, code, node.Token)
+        public ParseError(string message, int code, ParseNode node) : this(message, code,  0, node.Token.StartPos, node.Token.StartPos, node.Token.Length)
         {
         }
 
-        public ParseError(string message, int code, Token token) : this(message, code, token.File, token.Line, token.Column, token.StartPos, token.Length)
+        public ParseError(string message, int code, int line, int col, int pos, int length)
         {
-        }
-
-        public ParseError(string message, int code) : this(message, code, string.Empty, 0, 0, 0, 0)
-        {
-        }
-
-        public ParseError(string message, int code, string file, int line, int col, int pos, int length)
-        {
-            this.file = file;
             this.message = message;
             this.code = code;
             this.line = line;
@@ -182,20 +170,20 @@ namespace Gale.LScripts.TinyPG
                 case TokenType.Start:
                     Value = EvalStart(tree, paramlist);
                     break;
-                case TokenType.Meta:
-                    Value = EvalMeta(tree, paramlist);
+                case TokenType.Entry:
+                    Value = EvalEntry(tree, paramlist);
                     break;
-                case TokenType.Item:
-                    Value = EvalItem(tree, paramlist);
-                    break;
-                case TokenType.Value:
-                    Value = EvalValue(tree, paramlist);
-                    break;
-                case TokenType.Atom:
-                    Value = EvalAtom(tree, paramlist);
+                case TokenType.Payload:
+                    Value = EvalPayload(tree, paramlist);
                     break;
                 case TokenType.Group:
                     Value = EvalGroup(tree, paramlist);
+                    break;
+                case TokenType.PixelToken:
+                    Value = EvalPixelToken(tree, paramlist);
+                    break;
+                case TokenType.Token:
+                    Value = EvalToken(tree, paramlist);
                     break;
 
                 default:
@@ -207,65 +195,32 @@ namespace Gale.LScripts.TinyPG
 
         protected virtual object EvalStart(ParseTree tree, params object[] paramlist)
         {
-			return new ComplexLS("LScript",
-					Nodes.Where(n => n.Token.Type == TokenType.Item)
-					.Select(i => i.Eval(tree, paramlist) as LScript)
-					.ToArray());
-		}
-
-        protected virtual object EvalMeta(ParseTree tree, params object[] paramlist)
-        {
-            foreach (var node in Nodes)
-                node.Eval(tree, paramlist);
-            return null;
+            return this.GetValue(tree, TokenType.Entry, 0);
         }
 
-        protected virtual object EvalItem(ParseTree tree, params object[] paramlist)
+        protected virtual object EvalEntry(ParseTree tree, params object[] paramlist)
         {
-			string r_name = Nodes.First(n => n.Token.Type == TokenType.WORD).Token.Text;
-			var val = Nodes.First(n => n.Token.Type == TokenType.Value).Nodes.First();
-			if (val.Token.Type == TokenType.Atom)
-			{
-				object token;
-				var atom = val.Nodes.First();
-				if (atom.Token.Type == TokenType.NUMBER)
-					token = int.Parse(atom.Token.Text);
-                else if (atom.Token.Type == TokenType.DOUBLE)
-                    token = double.Parse(atom.Token.Text);
-                else
-					token = atom.Token.Text.Substring(1, atom.Token.Text.Length - 2);
-				return new TokenLS(r_name, token);
-			}
-			else if (val.Token.Type == TokenType.Group)
-			{
-				return new ComplexLS(r_name,
-					val.Nodes.Where(n => n.Token.Type == TokenType.Item)
-					.Select(i => i.Eval(tree, paramlist) as LScript)
-					.ToArray());
-			}
-			else
-				return new LScript(r_name);
-		}
-
-        protected virtual object EvalValue(ParseTree tree, params object[] paramlist)
-        {
-            foreach (var node in Nodes)
-                node.Eval(tree, paramlist);
-            return null;
+            throw new NotImplementedException();
         }
 
-        protected virtual object EvalAtom(ParseTree tree, params object[] paramlist)
+        protected virtual object EvalPayload(ParseTree tree, params object[] paramlist)
         {
-            foreach (var node in Nodes)
-                node.Eval(tree, paramlist);
-            return null;
+            throw new NotImplementedException();
         }
 
         protected virtual object EvalGroup(ParseTree tree, params object[] paramlist)
         {
-            foreach (var node in Nodes)
-                node.Eval(tree, paramlist);
-            return null;
+            throw new NotImplementedException();
+        }
+
+        protected virtual object EvalPixelToken(ParseTree tree, params object[] paramlist)
+        {
+            return Int32.Parse((this.GetValue(tree, TokenType.PIXELS, 0) as string).TrimEnd('p','x'));
+        }
+
+        protected virtual object EvalToken(ParseTree tree, params object[] paramlist)
+        {
+            throw new NotImplementedException();
         }
 
 

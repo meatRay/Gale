@@ -41,12 +41,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComplexLS.cs" />
+    <Compile Include="Pixels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LScript.cs" />
+    <Compile Include="TinyPG\LScriptTree.cs" />
     <Compile Include="TinyPG\Parser.cs" />
     <Compile Include="TinyPG\ParseTree.cs" />
-    <Compile Include="TinyPG\RuneTree.cs" />
     <Compile Include="TinyPG\Scanner.cs" />
+    <Compile Include="TokenLS.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

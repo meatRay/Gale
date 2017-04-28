@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
@@ -15,7 +14,6 @@ namespace Gale.LScripts.TinyPG
         public string Input;
         public int StartPos = 0;
         public int EndPos = 0;
-        public string CurrentFile;
         public int CurrentLine;
         public int CurrentColumn;
         public int CurrentPosition;
@@ -25,7 +23,6 @@ namespace Gale.LScripts.TinyPG
         private Token LookAheadToken;
         private List<TokenType> Tokens;
         private List<TokenType> SkipList; // tokens to be skipped
-        private readonly TokenType FileAndLine;
 
         public Scanner()
         {
@@ -36,9 +33,15 @@ namespace Gale.LScripts.TinyPG
             Skipped = new List<Token>();
 
             SkipList = new List<TokenType>();
-            SkipList.Add(TokenType.HIDELINE);
-            SkipList.Add(TokenType.HIDEBLOCK);
             SkipList.Add(TokenType.WHITESPACE);
+
+            regex = new Regex(@":", RegexOptions.Compiled);
+            Patterns.Add(TokenType.GOPEN, regex);
+            Tokens.Add(TokenType.GOPEN);
+
+            regex = new Regex(@";", RegexOptions.Compiled);
+            Patterns.Add(TokenType.GCLOSE, regex);
+            Tokens.Add(TokenType.GCLOSE);
 
             regex = new Regex(@"//[^\n]*\n?", RegexOptions.Compiled);
             Patterns.Add(TokenType.HIDELINE, regex);
@@ -52,29 +55,25 @@ namespace Gale.LScripts.TinyPG
             Patterns.Add(TokenType.QUOTE, regex);
             Tokens.Add(TokenType.QUOTE);
 
-            regex = new Regex(@":", RegexOptions.Compiled);
-            Patterns.Add(TokenType.SOPEN, regex);
-            Tokens.Add(TokenType.SOPEN);
+            regex = new Regex(@"\d+px", RegexOptions.Compiled);
+            Patterns.Add(TokenType.PIXELS, regex);
+            Tokens.Add(TokenType.PIXELS);
 
-            regex = new Regex(@";", RegexOptions.Compiled);
-            Patterns.Add(TokenType.SCLOSE, regex);
-            Tokens.Add(TokenType.SCLOSE);
-
-            regex = new Regex(@"\d+", RegexOptions.Compiled);
+            regex = new Regex(@"-?(?:\d*\.)?\d+", RegexOptions.Compiled);
             Patterns.Add(TokenType.NUMBER, regex);
             Tokens.Add(TokenType.NUMBER);
 
-            regex = new Regex(@"\d+.\d+", RegexOptions.Compiled);
-            Patterns.Add(TokenType.DOUBLE, regex);
-            Tokens.Add(TokenType.DOUBLE);
+            regex = new Regex(@"#\w+", RegexOptions.Compiled);
+            Patterns.Add(TokenType.META, regex);
+            Tokens.Add(TokenType.META);
+
+            regex = new Regex(@"\$\w+", RegexOptions.Compiled);
+            Patterns.Add(TokenType.NAME, regex);
+            Tokens.Add(TokenType.NAME);
 
             regex = new Regex(@"\w+", RegexOptions.Compiled);
             Patterns.Add(TokenType.WORD, regex);
             Tokens.Add(TokenType.WORD);
-
-            regex = new Regex("#", RegexOptions.Compiled);
-            Patterns.Add(TokenType.META, regex);
-            Tokens.Add(TokenType.META);
 
             regex = new Regex(@"\s+", RegexOptions.Compiled);
             Patterns.Add(TokenType.WHITESPACE, regex);
@@ -85,17 +84,11 @@ namespace Gale.LScripts.TinyPG
 
         public void Init(string input)
         {
-            Init(input, "");
-        }
-
-        public void Init(string input, string fileName)
-        {
             this.Input = input;
             StartPos = 0;
             EndPos = 0;
-            CurrentFile = fileName;
-            CurrentLine = 1;
-            CurrentColumn = 1;
+            CurrentLine = 0;
+            CurrentColumn = 0;
             CurrentPosition = 0;
             LookAheadToken = null;
         }
@@ -118,8 +111,6 @@ namespace Gale.LScripts.TinyPG
             LookAheadToken = null; // reset lookahead token, so scanning will continue
             StartPos = tok.EndPos;
             EndPos = tok.EndPos; // set the tokenizer to the new scan position
-            CurrentLine = tok.Line + (tok.Text.Length - tok.Text.Replace("\n", "").Length);
-            CurrentFile = tok.File;
             return tok;
         }
 
@@ -131,9 +122,6 @@ namespace Gale.LScripts.TinyPG
         {
             int i;
             int startpos = StartPos;
-            int endpos = EndPos;
-            int currentline = CurrentLine;
-            string currentFile = CurrentFile;
             Token tok = null;
             List<TokenType> scantokens;
 
@@ -160,7 +148,7 @@ namespace Gale.LScripts.TinyPG
                 TokenType index = (TokenType)int.MaxValue;
                 string input = Input.Substring(startpos);
 
-                tok = new Token(startpos, endpos);
+                tok = new Token(startpos, EndPos);
 
                 for (i = 0; i < scantokens.Count; i++)
                 {
@@ -179,26 +167,14 @@ namespace Gale.LScripts.TinyPG
                     tok.Text = Input.Substring(tok.StartPos, len);
                     tok.Type = index;
                 }
-                else if (tok.StartPos == tok.EndPos)
+                else if (tok.StartPos < tok.EndPos - 1)
                 {
-                    if (tok.StartPos < Input.Length)
-                        tok.Text = Input.Substring(tok.StartPos, 1);
-                    else
-                        tok.Text = "EOF";
+                    tok.Text = Input.Substring(tok.StartPos, 1);
                 }
-
-                // Update the line and column count for error reporting.
-                tok.File = currentFile;
-                tok.Line = currentline;
-                if (tok.StartPos < Input.Length)
-                    tok.Column = tok.StartPos - Input.LastIndexOf('\n', tok.StartPos);
 
                 if (SkipList.Contains(tok.Type))
                 {
                     startpos = tok.EndPos;
-                    endpos = tok.EndPos;
-                    currentline = tok.Line + (tok.Text.Length - tok.Text.Replace("\n", "").Length);
-                    currentFile = tok.File;
                     Skipped.Add(tok);
                 }
                 else
@@ -206,19 +182,6 @@ namespace Gale.LScripts.TinyPG
                     // only assign to non-skipped tokens
                     tok.Skipped = Skipped; // assign prior skips to this token
                     Skipped = new List<Token>(); //reset skips
-                }
-
-                // Check to see if the parsed token wants to 
-                // alter the file and line number.
-                if (tok.Type == FileAndLine)
-                {
-                    var match = Patterns[tok.Type].Match(tok.Text);
-                    var fileMatch = match.Groups["File"];
-                    if (fileMatch.Success)
-                        currentFile = fileMatch.Value.Replace("\\\\", "\\");
-                    var lineMatch = match.Groups["Line"];
-                    if (lineMatch.Success)
-                        currentline = int.Parse(lineMatch.Value, NumberStyles.Integer, CultureInfo.InvariantCulture);
                 }
             }
             while (SkipList.Contains(tok.Type));
@@ -241,30 +204,28 @@ namespace Gale.LScripts.TinyPG
 
             //Non terminal tokens:
             Start   = 2,
-            Meta    = 3,
-            Item    = 4,
-            Value   = 5,
-            Atom    = 6,
-            Group   = 7,
+            Entry   = 3,
+            Payload = 4,
+            Group   = 5,
+            PixelToken= 6,
+            Token   = 7,
 
             //Terminal tokens:
-            HIDELINE= 8,
-            HIDEBLOCK= 9,
-            QUOTE   = 10,
-            SOPEN   = 11,
-            SCLOSE  = 12,
-            NUMBER  = 13,
-            WORD    = 14,
+            GOPEN   = 8,
+            GCLOSE  = 9,
+            HIDELINE= 10,
+            HIDEBLOCK= 11,
+            QUOTE   = 12,
+            PIXELS  = 13,
+            NUMBER  = 14,
             META    = 15,
-            WHITESPACE= 16,
-            DOUBLE = 17
+            NAME    = 16,
+            WORD    = 17,
+            WHITESPACE= 18
     }
 
     public class Token
     {
-        private string file;
-        private int line;
-        private int column;
         private int startpos;
         private int endpos;
         private string text;
@@ -272,21 +233,6 @@ namespace Gale.LScripts.TinyPG
 
         // contains all prior skipped symbols
         private List<Token> skipped;
-
-        public string File { 
-            get { return file; } 
-            set { file = value; }
-        }
-
-        public int Line { 
-            get { return line; } 
-            set { line = value; }
-        }
-
-        public int Column {
-            get { return column; } 
-            set { column = value; }
-        }
 
         public int StartPos { 
             get { return startpos;} 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Box2DX.Common;
 using OpenTK;
 using Gale.Props;
+using Box2DX.Dynamics;
 
 namespace Gale
 {
@@ -16,8 +17,10 @@ namespace Gale
 
         public PropManager Props { get; private set; }
 
+        public Body BoundsPhysics { get; private set; }
 
-        public Level(Game game_context)
+
+        public Level(Game game_context, Body bounds_physics)
         {
             Context = game_context;
             Props = new PropManager(this);

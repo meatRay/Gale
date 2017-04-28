@@ -1,5 +1,9 @@
 ﻿ROOM:
 	BACKDROP: FILENAME "Img/Room/Office/backdrop.png" ;
+	BOUNDS:
+		LEFT 0.16 RIGHT 9.84
+		BOTTOM 0.0 TOP 13.0
+	;
 	PROPS:
 		PROP:
 			TEMPLATE:
@@ -8,47 +12,67 @@
 					FILENAME "Img/Character/Gale_Dribble.png" 
 					DEPTH "18px" 
 				;
+				MASS 1.0 
+				COLLIDES 
+				CANMOVE
 			;
+			PLAYER
 			X 8.45 Y 6.80 
-			MASS 1.0 
-			COLLIDES; 
-			CANMOVE; 
-			PLAYER;
 		;
 
 		PROP:
 			TEMPLATE:
 				NAME "storage crate"
-				SPRITE: FILENAME "Img/Room/Office/crate.png" DEPTH "30px" ;
+				SPRITE: FILENAME "Img/Room/Office/crate.png" DEPTH "40px" ;
+				MASS 10.0 CANMOVE COLLIDES
 			;
-			X 5.84 Y 8.08 MASS 10.0 CANMOVE; COLLIDES;
+			X 0.16 Y 6.80 
 		;
 		PROP:
 			TEMPLATE:
 				NAME "foldout table"
 				SPRITE: FILENAME "Img/Prop/office_table.png" DEPTH "64px" ;
+				MASS 10.0 COLLIDES
 			;
-			X 6.50 Y 5.73 MASS 10.0 COLLIDES;
+			X 6.50 Y 5.73
 		;
 		PROP:
 			TEMPLATE:
 				NAME "bookcase"
 				SPRITE: FILENAME "Img/Room/Office/bookcase.png" DEPTH "48px" ;
+				MASS 50.0 COLLIDES
 			;
-			X 3.77 Y 12.19 MASS 50.0 COLLIDES;
+			X 3.77 Y 12.19
 		;
 		PROP:
 			TEMPLATE:
 				NAME "wheelie-chair"
 				SPRITE: FILENAME "Img/Room/Office/office_chair.png" DEPTH "24px" ;
+				MASS 0.2 CANMOVE COLLIDES FRICTION 0.5
 			;
-			X 7.45 Y 6.73 MASS 0.2 CANMOVE; COLLIDES;
+			X 7.45 Y 6.73
+		;
+		PROP:
+			TEMPLATE:
+				NAME "messy bed"
+				SPRITE: FILENAME "Img/Room/Office/bed.png" DEPTH "172px" ;
+				MASS 15.0 COLLIDES
+			;
+			X 8.44 Y 10.31 
 		;
 		PROP:
 			TEMPLATE:
 				SPRITE: FILENAME "Img/Room/Office/frontdrop.png" DEPTH "100px" ;
+				MASS 0.0 COLLIDES
 			;
-			X 0.0 Y 0.0 MASS 0.0 COLLIDES;
+			X 0.0 Y 0.0 
+		;
+		PROP:
+			TEMPLATE:
+				SPRITE: FILENAME "Img/Room/Office/midwall.png" DEPTH "12px" ;
+				MASS 0.0 COLLIDES
+			;
+			X 4.1719 Y 7.984 
 		;
 	;
 ;

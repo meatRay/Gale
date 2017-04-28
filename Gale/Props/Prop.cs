@@ -26,7 +26,7 @@ namespace Gale.Props
         public bool IsMoving { get; private set; }
 
         public Prop(PropTemplate template, Level level_context, Body physics, Shape physics_shape)
-            : base(template.Image, template.Name)
+            : base(template.Image, template.Name, template.Mass, template.Friction, template.Collides, template.CanMove)
         {
             Image.AcquireUse();
             LevelContext = level_context;
