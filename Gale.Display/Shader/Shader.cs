@@ -7,6 +7,7 @@ namespace Gale
 {
 	public partial class Shader : IDisposable
 	{
+		public Sprite Highlight;
 		public int ShaderID { get; private set; } = -1;
 		public int ModelMatLocation { get; private set; } = -1;
 		public int TextureLocation { get; private set; } = -1;

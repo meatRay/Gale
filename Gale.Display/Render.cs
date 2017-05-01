@@ -35,7 +35,7 @@ namespace Gale
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GL.ClearColor(0.1f, 0.1f, 0.3f, 0f);
+            GL.ClearColor(0.1f, 0.1f, 0.1f, 0f);
             GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.Blend);
 
@@ -44,7 +44,6 @@ namespace Gale
             VSync = VSyncMode.Off;
         }
 
-        float _time = 0.0f;
         public const float ViewTiles = 8.0f;
         public float AspectRatio => (float)Width / Height;
         public Vector2 Camera = new Vector2(-0.0f, -0.0f);

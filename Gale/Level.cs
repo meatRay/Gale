@@ -29,7 +29,7 @@ namespace Gale
         {
             Backdrop?.Render(render_context);
             // Order gets to be expensive over 10k props probably.  Find a cleaner solution!!
-            foreach (var sprite in Props.All.OrderByDescending(p => p.GetPosition().Y + p.ZPosition))
+            foreach (var sprite in Props.All.OrderByDescending(p => p.GetPosition().Y - p.ZPosition))
                 sprite.Render(render_context);
         }
 

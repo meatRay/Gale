@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
-namespace Gale.LScripts.TinyPG
+namespace Gale.LScripts
 {
     #region Scanner
 
@@ -63,13 +63,17 @@ namespace Gale.LScripts.TinyPG
             Patterns.Add(TokenType.NUMBER, regex);
             Tokens.Add(TokenType.NUMBER);
 
+            regex = new Regex(@"\$[\w\.\d]+", RegexOptions.Compiled);
+            Patterns.Add(TokenType.NAME, regex);
+            Tokens.Add(TokenType.NAME);
+
             regex = new Regex(@"#\w+", RegexOptions.Compiled);
             Patterns.Add(TokenType.META, regex);
             Tokens.Add(TokenType.META);
 
-            regex = new Regex(@"\$\w+", RegexOptions.Compiled);
-            Patterns.Add(TokenType.NAME, regex);
-            Tokens.Add(TokenType.NAME);
+            regex = new Regex(@"de(fine|fin|fi|f)\$[\w\.\d]+", RegexOptions.Compiled);
+            Patterns.Add(TokenType.NEWNAME, regex);
+            Tokens.Add(TokenType.NEWNAME);
 
             regex = new Regex(@"\w+", RegexOptions.Compiled);
             Patterns.Add(TokenType.WORD, regex);
@@ -208,20 +212,22 @@ namespace Gale.LScripts.TinyPG
             Payload = 4,
             Group   = 5,
             PixelToken= 6,
-            Token   = 7,
+            QuoteToken= 7,
+            Token   = 8,
 
             //Terminal tokens:
-            GOPEN   = 8,
-            GCLOSE  = 9,
-            HIDELINE= 10,
-            HIDEBLOCK= 11,
-            QUOTE   = 12,
-            PIXELS  = 13,
-            NUMBER  = 14,
-            META    = 15,
+            GOPEN   = 9,
+            GCLOSE  = 10,
+            HIDELINE= 11,
+            HIDEBLOCK= 12,
+            QUOTE   = 13,
+            PIXELS  = 14,
+            NUMBER  = 15,
             NAME    = 16,
-            WORD    = 17,
-            WHITESPACE= 18
+            META    = 17,
+            NEWNAME = 18,
+            WORD    = 19,
+            WHITESPACE= 20
     }
 
     public class Token

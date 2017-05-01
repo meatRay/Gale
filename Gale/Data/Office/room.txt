@@ -1,0 +1,47 @@
+﻿#IMPORT "Data/gale_dribble.txt"
+#IMPORT "Data/Office/templates.txt"
+
+ROOM:
+	BACKDROP: FILENAME "Img/Room/Office/backdrop.png" ;
+	BOUNDS:
+		LEFT 0.16 RIGHT 9.84 BOTTOM 0.0 TOP 13.0
+	;
+	PROPS:
+		PROP:
+			TEMPLATE $gale_dribble
+			PLAYER
+			ON_INTERACT:
+				WRITE "I really don't feel like investigating my inner self again."
+			;
+			X 8.45 Y 6.80 
+		;
+
+		PROP:
+			TEMPLATE $office.crate X 0.16 Y 6.80 
+			ON_INTERACT:
+				WRITE "It's full of space-junk from when you space-moved here a couple space-years ago."
+			;
+		;
+		PROP: TEMPLATE $office.table X 6.50 Y 5.73 ;
+		PROP: TEMPLATE $office.bookcase X 3.77 Y 12.19 ;
+		PROP: TEMPLATE $office.chair X 7.45 Y 6.73 ;
+		PROP: 
+			TEMPLATE $office.bed X 8.44 Y 10.31  
+			ON_INTERACT: WRITE "It's officially space-lunch o'clock!  Far too late for yet another nap." ;
+		;
+		PROP:
+			TEMPLATE:
+				SPRITE: FILENAME "Img/Room/Office/frontdrop.png" DEPTH 100px ;
+				MASS 0.0 COLLIDES
+			;
+			X 0.0 Y 0.0 
+		;
+		PROP:
+			TEMPLATE:
+				SPRITE: FILENAME "Img/Room/Office/midwall.png" DEPTH 12px ;
+				MASS 0.0 COLLIDES
+			;
+			X 4.1719 Y 7.984 
+		;
+	;
+;

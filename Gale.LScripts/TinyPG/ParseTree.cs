@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace Gale.LScripts.TinyPG
+namespace Gale.LScripts
 {
     #region ParseTree
     [Serializable]
@@ -182,6 +182,9 @@ namespace Gale.LScripts.TinyPG
                 case TokenType.PixelToken:
                     Value = EvalPixelToken(tree, paramlist);
                     break;
+                case TokenType.QuoteToken:
+                    Value = EvalQuoteToken(tree, paramlist);
+                    break;
                 case TokenType.Token:
                     Value = EvalToken(tree, paramlist);
                     break;
@@ -200,27 +203,47 @@ namespace Gale.LScripts.TinyPG
 
         protected virtual object EvalEntry(ParseTree tree, params object[] paramlist)
         {
-            throw new NotImplementedException();
+            return this.GetValue(tree, TokenType.WORD, 0) ?? this.GetValue(tree, TokenType.META, 0) + " " + this.GetValue(tree, TokenType.Payload, 0);
         }
 
         protected virtual object EvalPayload(ParseTree tree, params object[] paramlist)
         {
-            throw new NotImplementedException();
+            if (this.GetValue(tree, TokenType.Group, 0) != null)
+        		return this.GetValue(tree, TokenType.Group, 0);
+        	else
+        		return this.GetValue(tree, TokenType.Token, 0);
         }
 
         protected virtual object EvalGroup(ParseTree tree, params object[] paramlist)
         {
-            throw new NotImplementedException();
+            string output = ":\n";
+        	for( int i = 0; this.GetValue(tree, TokenType.Entry, i) != null; ++i )
+        		output += this.GetValue(tree, TokenType.Entry, i) + "\n";
+        	return output + ";\n";
         }
 
         protected virtual object EvalPixelToken(ParseTree tree, params object[] paramlist)
         {
-            return Int32.Parse((this.GetValue(tree, TokenType.PIXELS, 0) as string).TrimEnd('p','x'));
+            string pixls = this.GetValue(tree, TokenType.PIXELS, 0) as string;
+        	return Int32.Parse(pixls.Substring(0, pixls.Length-2));
+        }
+
+        protected virtual object EvalQuoteToken(ParseTree tree, params object[] paramlist)
+        {
+            string quot = this.GetValue(tree, TokenType.QUOTE, 0) as string;
+        	return quot.Substring(1, quot.Length-2);
         }
 
         protected virtual object EvalToken(ParseTree tree, params object[] paramlist)
         {
-            throw new NotImplementedException();
+            if( this.GetValue(tree, TokenType.QuoteToken, 0) != null )
+        		return this.GetValue(tree, TokenType.QuoteToken, 0);
+        	if( this.GetValue(tree, TokenType.PixelToken, 0) != null )
+        		return this.GetValue(tree, TokenType.PixelToken, 0);
+        	if( this.GetValue(tree, TokenType.NUMBER, 0) != null )
+        		return this.GetValue(tree, TokenType.NUMBER, 0);
+        	else
+        		return this.GetValue(tree, TokenType.NAME, 0);
         }
 
 

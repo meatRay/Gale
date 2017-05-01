@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Gale.LScripts.TinyPG
+namespace Gale.LScripts
 {
     #region Parser
 
@@ -37,14 +37,14 @@ namespace Gale.LScripts.TinyPG
         private void ParseStart(ParseNode parent)
         {
             Token tok;
-            ParseNode n;
             ParseNode node = parent.CreateNode(scanner.GetToken(TokenType.Start), "Start");
             parent.Nodes.Add(node);
 
             do {
                 ParseEntry(node);
-                tok = scanner.LookAhead(TokenType.WORD);
-            } while (tok.Type == TokenType.WORD);
+                tok = scanner.LookAhead(TokenType.WORD, TokenType.META);
+            } while (tok.Type == TokenType.WORD
+                || tok.Type == TokenType.META);
 
             parent.Token.UpdateRange(node.Token);
         }
@@ -58,22 +58,42 @@ namespace Gale.LScripts.TinyPG
 
 
             
-            tok = scanner.Scan(TokenType.WORD);
-            n = node.CreateNode(tok, tok.ToString() );
-            node.Token.UpdateRange(tok);
-            node.Nodes.Add(n);
-            if (tok.Type != TokenType.WORD) {
-                tree.Errors.Add(new ParseError("Unexpected token '" + tok.Text.Replace("\n", "") + "' found. Expected " + TokenType.WORD.ToString(), 0x1001, 0, tok.StartPos, tok.StartPos, tok.Length));
-                return;
+            tok = scanner.LookAhead(TokenType.WORD, TokenType.META);
+            switch (tok.Type)
+            {
+                case TokenType.WORD:
+                    tok = scanner.Scan(TokenType.WORD);
+                    n = node.CreateNode(tok, tok.ToString() );
+                    node.Token.UpdateRange(tok);
+                    node.Nodes.Add(n);
+                    if (tok.Type != TokenType.WORD) {
+                        tree.Errors.Add(new ParseError("Unexpected token '" + tok.Text.Replace("\n", "") + "' found. Expected " + TokenType.WORD.ToString(), 0x1001, 0, tok.StartPos, tok.StartPos, tok.Length));
+                        return;
+                    }
+                    break;
+                case TokenType.META:
+                    tok = scanner.Scan(TokenType.META);
+                    n = node.CreateNode(tok, tok.ToString() );
+                    node.Token.UpdateRange(tok);
+                    node.Nodes.Add(n);
+                    if (tok.Type != TokenType.META) {
+                        tree.Errors.Add(new ParseError("Unexpected token '" + tok.Text.Replace("\n", "") + "' found. Expected " + TokenType.META.ToString(), 0x1001, 0, tok.StartPos, tok.StartPos, tok.Length));
+                        return;
+                    }
+                    break;
+                default:
+                    tree.Errors.Add(new ParseError("Unexpected token '" + tok.Text.Replace("\n", "") + "' found.", 0x0002, 0, tok.StartPos, tok.StartPos, tok.Length));
+                    break;
             }
 
             
-            tok = scanner.LookAhead(TokenType.NAME, TokenType.GOPEN, TokenType.QUOTE, TokenType.PIXELS, TokenType.NUMBER);
-            if (tok.Type == TokenType.NAME
+            tok = scanner.LookAhead(TokenType.NEWNAME, TokenType.GOPEN, TokenType.QUOTE, TokenType.PIXELS, TokenType.NUMBER, TokenType.NAME);
+            if (tok.Type == TokenType.NEWNAME
                 || tok.Type == TokenType.GOPEN
                 || tok.Type == TokenType.QUOTE
                 || tok.Type == TokenType.PIXELS
-                || tok.Type == TokenType.NUMBER)
+                || tok.Type == TokenType.NUMBER
+                || tok.Type == TokenType.NAME)
             {
                 ParsePayload(node);
             }
@@ -90,15 +110,15 @@ namespace Gale.LScripts.TinyPG
 
 
             
-            tok = scanner.LookAhead(TokenType.NAME);
-            if (tok.Type == TokenType.NAME)
+            tok = scanner.LookAhead(TokenType.NEWNAME);
+            if (tok.Type == TokenType.NEWNAME)
             {
-                tok = scanner.Scan(TokenType.NAME);
+                tok = scanner.Scan(TokenType.NEWNAME);
                 n = node.CreateNode(tok, tok.ToString() );
                 node.Token.UpdateRange(tok);
                 node.Nodes.Add(n);
-                if (tok.Type != TokenType.NAME) {
-                    tree.Errors.Add(new ParseError("Unexpected token '" + tok.Text.Replace("\n", "") + "' found. Expected " + TokenType.NAME.ToString(), 0x1001, 0, tok.StartPos, tok.StartPos, tok.Length));
+                if (tok.Type != TokenType.NEWNAME) {
+                    tree.Errors.Add(new ParseError("Unexpected token '" + tok.Text.Replace("\n", "") + "' found. Expected " + TokenType.NEWNAME.ToString(), 0x1001, 0, tok.StartPos, tok.StartPos, tok.Length));
                     return;
                 }
             }
@@ -145,8 +165,9 @@ namespace Gale.LScripts.TinyPG
             
             do {
                 ParseEntry(node);
-                tok = scanner.LookAhead(TokenType.WORD);
-            } while (tok.Type == TokenType.WORD);
+                tok = scanner.LookAhead(TokenType.WORD, TokenType.META);
+            } while (tok.Type == TokenType.WORD
+                || tok.Type == TokenType.META);
 
             
             tok = scanner.Scan(TokenType.GCLOSE);
@@ -180,6 +201,25 @@ namespace Gale.LScripts.TinyPG
             parent.Token.UpdateRange(node.Token);
         }
 
+        private void ParseQuoteToken(ParseNode parent)
+        {
+            Token tok;
+            ParseNode n;
+            ParseNode node = parent.CreateNode(scanner.GetToken(TokenType.QuoteToken), "QuoteToken");
+            parent.Nodes.Add(node);
+
+            tok = scanner.Scan(TokenType.QUOTE);
+            n = node.CreateNode(tok, tok.ToString() );
+            node.Token.UpdateRange(tok);
+            node.Nodes.Add(n);
+            if (tok.Type != TokenType.QUOTE) {
+                tree.Errors.Add(new ParseError("Unexpected token '" + tok.Text.Replace("\n", "") + "' found. Expected " + TokenType.QUOTE.ToString(), 0x1001, 0, tok.StartPos, tok.StartPos, tok.Length));
+                return;
+            }
+
+            parent.Token.UpdateRange(node.Token);
+        }
+
         private void ParseToken(ParseNode parent)
         {
             Token tok;
@@ -191,14 +231,7 @@ namespace Gale.LScripts.TinyPG
             switch (tok.Type)
             {
                 case TokenType.QUOTE:
-                    tok = scanner.Scan(TokenType.QUOTE);
-                    n = node.CreateNode(tok, tok.ToString() );
-                    node.Token.UpdateRange(tok);
-                    node.Nodes.Add(n);
-                    if (tok.Type != TokenType.QUOTE) {
-                        tree.Errors.Add(new ParseError("Unexpected token '" + tok.Text.Replace("\n", "") + "' found. Expected " + TokenType.QUOTE.ToString(), 0x1001, 0, tok.StartPos, tok.StartPos, tok.Length));
-                        return;
-                    }
+                    ParseQuoteToken(node);
                     break;
                 case TokenType.PIXELS:
                     ParsePixelToken(node);
