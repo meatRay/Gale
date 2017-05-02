@@ -42,7 +42,7 @@ namespace Gale
 			float x = (float)prop_script.Read<TokenLS<double>>("X");
 			float y = (float)prop_script.Read<TokenLS<double>>("Y");
 
-			bool makeplayer = prop_script.ReadAll<LScript>("PLAYER").Any();
+			bool makeplayer = prop_script.Read<LScript>("PLAYER") != null;
 
 			var prop = SpawnProp(template, new Vec2(x, y), makeplayer);
 			prop.OnInteract = prop_script.Read<ComplexLS>("ON_INTERACT");

@@ -7,8 +7,8 @@
     <ProjectGuid>{D12CFFCD-92FB-4342-ADF4-540AA15AC388}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Gale.Display</RootNamespace>
-    <AssemblyName>Gale.Display</AssemblyName>
+    <RootNamespace>Gale.Visuals</RootNamespace>
+    <AssemblyName>Gale.Visuals</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -51,10 +51,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Renderer.cs" />
     <Compile Include="Shader\Shader.cs" />
     <Compile Include="Shader\Shader.Step.cs" />
     <Compile Include="Sprite.cs" />
-    <Compile Include="Render.cs" />
+    <Compile Include="Display.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="OpenTK.dll.config" />

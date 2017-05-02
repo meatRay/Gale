@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gale", "Gale\Gale.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gale.LScripts", "Gale.LScripts\Gale.LScripts.csproj", "{3D1B0DD7-8306-4848-A3BA-BA169B73162B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gale.Display", "Gale.Display\Gale.Display.csproj", "{D12CFFCD-92FB-4342-ADF4-540AA15AC388}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gale.Visuals", "Gale.Display\Gale.Visuals.csproj", "{D12CFFCD-92FB-4342-ADF4-540AA15AC388}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

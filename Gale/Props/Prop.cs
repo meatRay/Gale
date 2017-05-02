@@ -9,6 +9,7 @@ using Box2DX.Dynamics;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using Gale.LScripts;
+using Gale.Visuals;
 
 namespace Gale.Props
 {
@@ -37,15 +38,15 @@ namespace Gale.Props
 			PhysicsShape = physics_shape;
 		}
 
-		public void Render(Shader shader_program)
+		public void Render(Renderer render_context)
 		{
 			if (Visible)
 			{
 				var pos = GetPosition();
 				_translation = Matrix4.CreateTranslation(pos.X, pos.Y, 0.0f);
-				GL.UniformMatrix4(shader_program.ModelMatLocation, false, ref _translation);
-				GL.Uniform1(shader_program.ZLocation, ZPosition);
-				Image.Render(shader_program);
+				GL.UniformMatrix4(render_context.ShaderProgram.ModelMatLocation, false, ref _translation);
+				GL.Uniform1(render_context.ShaderProgram.ZLocation, ZPosition);
+				Image.Render(render_context);
 			}
 		}
 
@@ -64,7 +65,7 @@ namespace Gale.Props
 				var centr = new Vector2(Image.UnitSize.X, Image.UnitDepth);
 				TargetPosition -= centr / 2.0f;
 			}
-			IsMoving = true;
+		   IsMoving = true;
 		}
 		public void Update(double delta_time)
 		{

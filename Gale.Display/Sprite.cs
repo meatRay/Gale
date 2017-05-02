@@ -11,11 +11,11 @@ using System.Reflection;
 using System.IO;
 using System.Windows;
 
-namespace Gale
+namespace Gale.Visuals
 {
 	public interface IRender
 	{
-		void Render(Shader shader_program);
+		void Render(Renderer render_context);
 	}
 
 	class DotSet : IRender
@@ -51,7 +51,7 @@ namespace Gale
 			return new DotSet(buf, vecs.Count) { _objbuffer = obj };
 		}
 
-		public void Render(Shader shader_program)
+		public void Render(Renderer render_context)
 		{
 			GL.BindVertexArray(_objbuffer);
 			GL.PointSize(10.0f);
@@ -68,20 +68,20 @@ namespace Gale
 		public const float HTileSize = TileSize * 2;
 
 		public Vector2 UnitSize { get; private set; }
+		public float UnitDepth { get; private set; }
 		public int Width { get; private set; }
 		public int Height { get; private set; }
-		public float UnitDepth { get; private set; }
 		public int ReferenceCount { get; private set; }
 
-		public Sprite(int width, int height, int z_depth, int vert_buffer, int obj_buffer, int texture)
+		public Sprite(int width, int height, int vert_buffer, int obj_buffer, int texture, int unit_depth)
 		{
 			Width = width;
 			Height = height;
-			UnitDepth = z_depth / TileSize;
 			UnitSize = new Vector2(width / TileSize, height / TileSize);
 			_vertbuffer = vert_buffer;
 			_objbuffer = obj_buffer;
 			_texture = texture;
+			UnitDepth = unit_depth / TileSize;
 			ReferenceCount = 0;
 		}
 
@@ -90,15 +90,13 @@ namespace Gale
 		public void ReleaseUse()
 			=> --ReferenceCount;
 
-		static private int LoadHandle(string filename, out int width, out int height, bool embedded_resource = true)
+		protected static int LoadHandle(string filename, out int width, out int height, bool embedded_resource = true)
 		{
 			int tex = GL.GenTexture();
 			using (var bmp = embedded_resource
 				? (Bitmap)Image.FromFile(filename)
-				//? (Bitmap)ImageResources.ResourceManager.GetObject(filename)
 				//? (Bitmap)Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream($"Gale.{filename}"))
 				: (Bitmap)Image.FromFile(filename))
-			//using (var bmp = (Bitmap)ImageResources.ResourceManager.GetObject(filename))
 			{
 				width = bmp.Width;
 				height = bmp.Height;
@@ -109,18 +107,13 @@ namespace Gale
 				GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
 				bmp.UnlockBits(data);
 				GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-				//GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-				//GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.NearestClipmapLinearSgix);
 				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-
-				//GL.GetFloat((GetPName)ExtTextureFilterAnisotropic.MaxTextureMaxAnisotropyExt, out maxAniso);
-				//GL.TexParameter(TextureTarget.Texture2D, (TextureParameterName)ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, maxAniso);
 			}
 			return tex;
 		}
 
-		public static Sprite FromFile(string filename, Shader shader_resource, int z_depth)
+		public static Sprite FromFile(string filename, Shader shader_resource, int depth)
 		{
 			int w, h;
 			int _texture = LoadHandle(filename, out w, out h, false);
@@ -159,17 +152,19 @@ namespace Gale
 			GL.BindTexture(TextureTarget.Texture2D, _texture);
 			GL.BindVertexArray(0);
 
-			return new Sprite(w, h, z_depth, _vertbuffer, _objbuffer, _texture);
+			return new Sprite(w, h, _vertbuffer, _objbuffer, _texture, depth);
 		}
 
-		public void Render(Shader shader_program)
+		public void Render(Renderer render_context)
 		{
-			if (shader_program.Highlight == this)
-				GL.Uniform1(shader_program.MusicLocation, 0.0);
+			if (render_context.ShaderProgram.Highlight == this)
+				render_context.ShaderProgram.Music.Write(0.0f);
+			else
+				render_context.ShaderProgram.Music.Write();
 			GL.BindVertexArray(_objbuffer);
 			GL.ActiveTexture(TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, _texture);
-			GL.Uniform1(shader_program.TextureLocation, 0);
+			GL.Uniform1(render_context.ShaderProgram.TextureLocation, 0);
 			GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
 		}
 
