@@ -80,8 +80,10 @@ namespace Gale
 			}
 		}
 		(Prop, Prop) Selector;
+		public TextService Text;
 		double select_timr = 0.0;
 		bool investigatemode = false;
+		TextRender line;
 		public void Update(object sender, FrameEventArgs e)
 		{
 			ActiveLevel.Update(e.Time);
@@ -137,14 +139,13 @@ namespace Gale
 
 			rendercontext.ShaderProgram.Music.Default = _music;
 
-			var matrix = Matrix4.Identity;
-			GL.UniformMatrix4(rendercontext.ShaderProgram.ModelMatLocation, false, ref matrix);
+			rendercontext.ShaderProgram.Model.Write(Matrix4.Identity);
 			ActiveLevel.Render(rendercontext);
-
+			line?.Render(rendercontext);
 			rendercontext.BuildUIScene();
 			foreach (var ui in UIElements)
 				ui.Render(rendercontext);
-
+			
 			rendercontext.Display();
 			Window.Title = $"FPS: {(1.0 / e.Time).ToString("F")}";
 			timr.Stop();
@@ -178,8 +179,10 @@ namespace Gale
 					front.ZPosition = 1.0f;
 					game.Selector = (back, front);
 
-					game.UIElements.Add(new UI(game.Content.MakeSprite("Img/magnify.png", 0), 0, 0, 1f, 0.1f));
+					game.UIElements.Add(new UI(game.Content.MakeSprite("Img/ui_icon.png", 0), 0, 0, 0.2f, 0.2f));
 
+					game.Text = TextService.FromFile(Environment.ExpandEnvironmentVariables("%WINDIR%/Fonts/Arial.ttf"), game.Window.RenderWorker);
+					game.line = game.Text.CompileString("Hello, World!", new Vector2(5,5), game.Window.RenderWorker);
 					window.Run(60);
 				}
 			}
@@ -196,6 +199,8 @@ namespace Gale
 				{
 					UnbindDisplay();
 					ActiveLevel.Dispose();
+					foreach (var ui in UIElements)
+						ui.Image.Dispose();
 				}
 				disposedValue = true;
 			}

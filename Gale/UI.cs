@@ -29,7 +29,7 @@ namespace Gale
 
 		public void Render(Renderer render_context)
 		{
-			GL.UniformMatrix4(render_context.ShaderProgram.ModelMatLocation, false, ref _modelview);
+			render_context.ShaderProgram.Model.Write(_modelview);
 			Image.Render(render_context);
 		}
 	}

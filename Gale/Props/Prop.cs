@@ -44,7 +44,7 @@ namespace Gale.Props
 			{
 				var pos = GetPosition();
 				_translation = Matrix4.CreateTranslation(pos.X, pos.Y, 0.0f);
-				GL.UniformMatrix4(render_context.ShaderProgram.ModelMatLocation, false, ref _translation);
+				render_context.ShaderProgram.Model.Write(_translation);
 				GL.Uniform1(render_context.ShaderProgram.ZLocation, ZPosition);
 				Image.Render(render_context);
 			}
@@ -65,7 +65,7 @@ namespace Gale.Props
 				var centr = new Vector2(Image.UnitSize.X, Image.UnitDepth);
 				TargetPosition -= centr / 2.0f;
 			}
-		   IsMoving = true;
+			IsMoving = true;
 		}
 		public void Update(double delta_time)
 		{

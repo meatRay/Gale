@@ -37,32 +37,32 @@ namespace Gale.Visuals
 	{
 		public Sprite Highlight;
 		public int ShaderID { get; private set; }
-		public int ModelMatLocation { get; private set; }
+		public ShaderMatrix Model { get; private set; }
 		public int TextureLocation { get; private set; }
 		public int VertexLocation { get; private set; }
 		public int UVLocation { get; private set; }
-		public int ProjectionLocation { get; private set; }
+		public ShaderMatrix Projection { get; private set; }
 		public int ZLocation { get; private set; }
-		public int ViewLocation { get; private set; }
+		public ShaderMatrix View { get; private set; }
 		public ShaderFloat Music { get; private set; }
 		public Shader(int shader_id,
-			int model_mat_location,
+			ShaderMatrix model_mat,
 			int texture_location,
 			int vertex_location,
 			int uv_location,
-			int proj_location,
+			ShaderMatrix proj,
 			int z_location,
-			int view_location,
+			ShaderMatrix view,
 			ShaderFloat music)
 		{
 			ShaderID = shader_id;
-			ModelMatLocation = model_mat_location;
+			Model = model_mat;
 			TextureLocation = texture_location;
 			VertexLocation = vertex_location;
 			UVLocation = uv_location;
-			ProjectionLocation = proj_location;
+			Projection = proj;
 			ZLocation = z_location;
-			ViewLocation = view_location;
+			View = view;
 			Music = music;
 		}
 
@@ -92,13 +92,13 @@ namespace Gale.Visuals
 			if (!string.IsNullOrWhiteSpace(log))
 				throw new Exception(log);
 
-			int model_id = GL.GetUniformLocation(id, "model_matrix");
+			var model_id = new ShaderMatrix(GL.GetUniformLocation(id, "model_matrix"));
 			int pos_id = GL.GetAttribLocation(id, "position");
 			int uv_id = GL.GetAttribLocation(id, "vertexUV");
 			int tex_id = GL.GetUniformLocation(id, "texture");
-			int proj_id = GL.GetUniformLocation(id, "projection");
+			var proj_id = new ShaderMatrix(GL.GetUniformLocation(id, "projection"));
 			int z_id = GL.GetUniformLocation(id, "z");
-			int view_id = GL.GetUniformLocation(id, "view");
+			var view_id = new ShaderMatrix(GL.GetUniformLocation(id, "view"));
 			var music = new ShaderFloat(GL.GetUniformLocation(id, "music"));
 			return new Shader(id, model_id, tex_id, pos_id, uv_id, proj_id, z_id, view_id, music);
 		}
