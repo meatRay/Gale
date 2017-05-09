@@ -15,23 +15,57 @@ namespace Gale.Visuals
 	public class TextRender : IRender
 	{
 		public Vector2 Position;
+		public bool Visible = true;
+		public float FontSize => _fontsize;
 		GlyphService[] Texts;
+		float _fontsize;
+		Matrix4 _fontscale;
 
-		public TextRender(Vector2 position, GlyphService[] glyphs)
+		public TextRender(Vector2 position, GlyphService[] glyphs, float font_size = 1.0f)
 		{
 			Position = position;
 			Texts = glyphs;
+			CalcFontSize(font_size);
+		}
+
+		public void CalcFontSize(float font_size)
+		{
+			_fontsize = font_size;
+			_fontscale = Matrix4.CreateScale(font_size) * Matrix4.CreateTranslation(Position.X, Position.Y, 0.0f);
 		}
 
 		public void Render(Renderer render_context)
 		{
-			var model = Matrix4.CreateTranslation(Position.X, Position.Y, 0.0f);
-			foreach (var text in Texts)
+			if (Visible)
 			{
-				render_context.ShaderProgram.Model.Write(model);
-				text.Image.Render(render_context);
-				model *= text.Next;
+				//var offset = ;
+				//render_context.ShaderProgram.View.Write(ref offset);
+				//var model = _fontscale;
+				render_context.ShaderProgram.Model.Push(ref _fontscale);
+				RenderChar(0, render_context);
+				render_context.ShaderProgram.Model.Pop();
+				render_context.ShaderProgram.View.Write(Matrix4.Identity);
 			}
+		}
+
+		public void RenderChar( int at, Renderer render )
+		{
+			if (at >= Texts.Length)
+				return;
+			var text = Texts[at];
+			//Matrix4 model;
+			if (text.Character == '\n')
+				render.ShaderProgram.Model.Push(_fontscale * Matrix4.CreateTranslation(0, -0.35f, 0));
+			else
+			{
+				var to_use = text.Offset * render.ShaderProgram.Model.Top;
+				render.ShaderProgram.Model.Push(ref to_use);
+				text.Image?.Render(render);
+				render.ShaderProgram.Model.Pop();
+				render.ShaderProgram.Model.Push(text.Next * render.ShaderProgram.Model.Top);
+			}
+			RenderChar(++at, render);
+			render.ShaderProgram.Model.Pop();
 		}
 	}
 
@@ -39,33 +73,40 @@ namespace Gale.Visuals
 	{
 		public char Character { get; private set; }
 		public Matrix4 Next { get; private set; }
+		public Matrix4 Offset { get; private set; }
 		public Sprite Image { get; private set; }
-		public GlyphService(char character, Matrix4 next, Sprite image)
+		public GlyphService(char character, Matrix4 next, Matrix4 offset, Sprite image)
 		{
 			Character = character;
 			Next = next;
 			Image = image;
+			Offset = offset;
 		}
 
 		public static GlyphService FromGlyph(char character, GlyphSlot glyph, Renderer render_context)
 		{
 			glyph.RenderGlyph(RenderMode.Normal);
-			Bitmap m;
+			Bitmap m = null;
 			using (var g = glyph.GetGlyph())
 			{
 				g.ToBitmap(RenderMode.Normal, new FTVector26Dot6(0, 0), false);
 				var bt = g.ToBitmapGlyph();
-				m = bt.Bitmap.ToGdipBitmap();
+				if (bt.Bitmap.Width > 0)
+					m = bt.Bitmap.ToGdipBitmap();
 			}
 			// Later on write a Sprite.FromBitmap for Glyph Bitmaps..
-			var sprite = Sprite.FromBitmap(m, render_context.ShaderProgram, 0);
-			sprite.AcquireUse();
-			return new GlyphService(character, CalcNext(glyph), sprite);
+			var sprite = m == null ? null : Sprite.FromBitmap(m, render_context.ShaderProgram, 0, 0, 0, true);
+			sprite?.AcquireUse();
+			return new GlyphService(character, CalcNext(glyph), CalcOffset(glyph), sprite);
 		}
 		public static Matrix4 CalcNext(GlyphSlot glyph)
-			=> Matrix4.CreateTranslation(glyph.Advance.X.ToSingle() / Sprite.TileSize,
+			=> Matrix4.CreateTranslation((glyph.Advance.X.ToSingle() / Sprite.TileSize) * 0.68f,
 				glyph.Advance.Y.ToSingle() / Sprite.TileSize,
 				0);
+		public static Matrix4 CalcOffset(GlyphSlot glyph)
+			=> Matrix4.CreateTranslation(glyph.Metrics.HorizontalBearingX.ToSingle() / Sprite.TileSize,
+				(glyph.Metrics.HorizontalBearingY - glyph.Metrics.Height).ToSingle() / Sprite.TileSize,
+				0) * Matrix4.CreateScale(0.68f);
 
 		#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls
@@ -105,7 +146,7 @@ namespace Gale.Visuals
 
 		public TextRender CompileString(string input, Vector2 position, Renderer render_context)
 		{
-			var chars = input.Where(i => i > 32 && i < 127).ToArray();
+			var chars = input.Where(i => i > 0 && i < 127).ToArray();
 			var glyphs = new GlyphService[chars.Length];
 			for (int i = 0; i < chars.Length; ++i)
 				glyphs[i] = LoadedCharacters[chars[i]];
@@ -127,8 +168,8 @@ namespace Gale.Visuals
 			var lib = new Library();
 			var font = new Face(lib, file_name);
 			var char_map = new Dictionary<char, GlyphService>();
-			font.SetCharSize(12, 12, 300, 300);
-			for (int i = 33; i < 127; ++i)
+			font.SetCharSize(24, 24, 300, 300);
+			for (int i = 0; i < 127; ++i)
 			{
 				font.LoadChar((char)i, LoadFlags.Default, LoadTarget.Normal);
 				char_map[(char)i] = GlyphService.FromGlyph((char)i, font.Glyph, render_context);
@@ -147,6 +188,8 @@ namespace Gale.Visuals
 				{
 					foreach (var g in LoadedCharacters.Values)
 						g.Dispose();
+					Font.Dispose();
+					FontLib.Dispose();
 				}
 				disposedValue = true;
 			}

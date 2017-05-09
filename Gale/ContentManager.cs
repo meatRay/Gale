@@ -16,6 +16,7 @@ namespace Gale
 	class ContentManager
 	{
 		public Game GameContext { get; private set; }
+		public TextService Text;
 		public Dictionary<string, Sprite> ActiveTextures { get; private set; }
 		public ContentManager(Game game_context)
 		{
@@ -50,17 +51,54 @@ namespace Gale
 			return lvl;
 		}
 
+		public Sprite MakeAnimation(ComplexLS script)
+		{
+			string filename = script.Read<TokenLS<string>>("FILENAME");
+			if (ActiveTextures.TryGetValue(filename, out Sprite texture))
+				return texture;
+			var seqs = new List<AnimationSequence>();
+			int handle, w, h;
+			handle = Sprite.LoadHandle(filename, out w, out h);
+			foreach (var scriptsequence in script.ReadAll<ComplexLS>("SEQUENCE"))
+			{
+				string name = scriptsequence.ReadToken<string>("NAME");
+				var dirs = AnimationDirections.None;
+				foreach (var scriptdir in scriptsequence.Read<ComplexLS>("DIRECTIONS").SubRunes)
+					if (Enum.TryParse<AnimationDirections>(scriptdir.Word, true, out var fnddir))
+						dirs |= fnddir;
+				var locs = new List<(int X, int Y)>();
+				foreach (var scriptloc in scriptsequence.ReadAll<ComplexLS>("STEP"))
+					locs.Add((scriptloc.ReadToken<Pixels>("X"), scriptloc.ReadToken<Pixels>("Y")));
+				var scriptoffset = scriptsequence.Read<ComplexLS>("OFFSET");
+				var offset_x = scriptoffset != null ? scriptoffset.Read<TokenLS<Pixels>>("X") : null;
+				var offset_y = scriptoffset != null ? scriptoffset.Read<TokenLS<Pixels>>("Y") : null;
+				seqs.Add(Sprite.MakeSteps(name,
+					locs,
+					(scriptsequence.ReadToken<Pixels>("WIDTH"), scriptsequence.ReadToken<Pixels>("HEIGHT")),
+					(offset_x != null ?offset_x.Value : 0, offset_y != null ? offset_y.Value : 0),
+					(w,h), dirs));
+			}
+			var animation = new Animation(seqs.ToArray(), handle);
+			return ActiveTextures[filename] = animation;
+		}
+
 		public Sprite MakeSprite(ComplexLS sprite_script)
 		{
 			var depth = sprite_script.Read<TokenLS<Pixels>>("DEPTH");
+			var offset = sprite_script.Read<ComplexLS>("OFFSET");
+			var offset_x = offset != null ? offset.Read<TokenLS<Pixels>>("X") : null;
+			var offset_y = offset != null ? offset.Read<TokenLS<Pixels>>("Y") : null;
 			return MakeSprite(sprite_script.Read<TokenLS<string>>("FILENAME"),
-				depth != null ? depth.Value : 0);
+				depth != null ? depth.Value : 0,
+				offset_x != null ? offset_x.Value : 0,
+				offset_y != null ? offset_y.Value : 0);
 		}
-		public Sprite MakeSprite(string file_name, int z_depth, bool embedded_resource = false)
+		public Sprite MakeSprite(string file_name, int z_depth, int offset_x, int offset_y, bool embedded_resource = false)
 		{
 			if (ActiveTextures.TryGetValue(file_name, out Sprite texture))
 				return texture;
-			return ActiveTextures[file_name] = Sprite.FromFile(file_name, GameContext.Window.RenderWorker.ShaderProgram, z_depth);
+			return ActiveTextures[file_name] = Sprite.FromFile(file_name,
+				GameContext.Window.RenderWorker.ShaderProgram, z_depth, offset_x, offset_y);
 		}
 	}
 }

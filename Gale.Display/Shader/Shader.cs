@@ -11,27 +11,43 @@ namespace Gale.Visuals
 		public ShaderValue(int at)
 			=> At = at;
 		public int At { get; private set; }
-		public T Default { get; set; }
+		public T Default;
 
-		public void Write()
-			=> Write(Default);
-		public abstract void Write(T value);
+		public virtual void Write()
+			=> Write(ref Default);
+		public virtual void Write(T value)
+			=> Write(ref value);
+		public abstract void Write(ref T value);
 	}
 	public class ShaderFloat : ShaderValue<float>
 	{
 		public ShaderFloat(int at) : base(at)
 		{ }
 
-		public override void Write(float value)
+		public override void Write(ref float value)
 			=> GL.Uniform1(At, value);
 	}
 	public class ShaderMatrix : ShaderValue<Matrix4>
 	{
-		public ShaderMatrix(int at) : base(at)
-		{ }
+		public Matrix4 Top
+			=> _stack.Last.Value;
+		private LinkedList<Matrix4> _stack;
 
-		public override void Write(Matrix4 value)
+		public ShaderMatrix(int at) : base(at)
+			=> _stack = new LinkedList<Matrix4>();
+
+		public override void Write(ref Matrix4 value)
 			=> GL.UniformMatrix4(At, false, ref value);
+		public override void Write()
+			=> Write(_stack.Last.Value);
+		public void Push(ref Matrix4 value)
+			=> _stack.AddLast(value);
+		public void Push(Matrix4 value)
+			=> _stack.AddLast(value);
+		public void Pop()
+			=> _stack.RemoveLast();
+		public void Clear()
+			=> _stack.Clear();
 	}
 	public partial class Shader : IDisposable
 	{
@@ -41,6 +57,7 @@ namespace Gale.Visuals
 		public int TextureLocation { get; private set; }
 		public int VertexLocation { get; private set; }
 		public int UVLocation { get; private set; }
+		public ShaderMatrix UVOffset { get; private set; }
 		public ShaderMatrix Projection { get; private set; }
 		public int ZLocation { get; private set; }
 		public ShaderMatrix View { get; private set; }
@@ -53,7 +70,8 @@ namespace Gale.Visuals
 			ShaderMatrix proj,
 			int z_location,
 			ShaderMatrix view,
-			ShaderFloat music)
+			ShaderFloat music,
+			ShaderMatrix uv_offset)
 		{
 			ShaderID = shader_id;
 			Model = model_mat;
@@ -64,6 +82,7 @@ namespace Gale.Visuals
 			ZLocation = z_location;
 			View = view;
 			Music = music;
+			UVOffset = uv_offset;
 		}
 
 		public static async Task<Shader> CompileFrom(string vert_shader_filename, string frag_shader_filename)
@@ -100,7 +119,8 @@ namespace Gale.Visuals
 			int z_id = GL.GetUniformLocation(id, "z");
 			var view_id = new ShaderMatrix(GL.GetUniformLocation(id, "view"));
 			var music = new ShaderFloat(GL.GetUniformLocation(id, "music"));
-			return new Shader(id, model_id, tex_id, pos_id, uv_id, proj_id, z_id, view_id, music);
+			var uvo = new ShaderMatrix(GL.GetUniformLocation(id, "uv_at"));
+			return new Shader(id, model_id, tex_id, pos_id, uv_id, proj_id, z_id, view_id, music, uvo);
 		}
 
 		#region IDisposable Support

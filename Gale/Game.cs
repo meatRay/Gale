@@ -19,23 +19,88 @@ namespace Gale
 	class Game : IDisposable
 	{
 		public World PhysicsContext { get; private set; }
-		public AABB AABBBounds;
+		public AABB Bounds;
 		public Prop Player;
 		public Display Window;
 		public Vector2 Camera;
+		public Dictionary<string, int> Journal = new Dictionary<string, int>();
 		public ContentManager Content { get; private set; }
-		public List<UI> UIElements { get; private set; }
+		public UIManager GUI { get; private set; }
+		public Vector2 UISize { get; private set; }
+
+		(Prop Highlight, Prop Glass) Selector;
+		double select_timr = 0.1;
+		bool investigatemode = false;
+		string _titleroot;
 
 		public Game(Display window)
 		{
+			_titleroot = window.Title;
 			Window = window;
+			UISize = new Vector2(10, 10 / Window.AspectRatio);
 			BindDisplay();
-			AABBBounds = new AABB() { LowerBound = new Vec2(-100.0f, -100.0f), UpperBound = new Vec2(100.0f, 100.0f) };
-			PhysicsContext = new World(AABBBounds, new Vec2(0.0f, 0.0f), false);
+			Bounds = new AABB() { LowerBound = new Vec2(-100.0f, -100.0f), UpperBound = new Vec2(100.0f, 100.0f) };
+			PhysicsContext = new World(Bounds, new Vec2(0.0f, 0.0f), false);
 			Content = new ContentManager(this);
-			UIElements = new List<UI>();
+			GUI = new UIManager(this);
+			PhysicsContext.SetContactListener(new TriggerCallback(Trigger));
 		}
-
+		private void Trigger(Prop prop)
+		{
+			if (prop.OnTrigger != null)
+				triggers.AddRange(prop.OnTrigger.SubRunes);
+		}
+		private List<LScript> triggers = new List<LScript>();
+		private void DoEvent(LScript step)
+		{
+			if (step.Word == "WRITE" && step is ComplexLS write)
+			{
+				GUI.Studyline = Content.Text.CompileString(write.ReadToken<string>("TEXT"),
+					new Vector2(0.1f, 0.65f), Window.RenderWorker);
+				GUI.Studybox.Children[0] = GUI.Studyline;
+				GUI.Studyline.CalcFontSize(0.35f);
+				GUI.DisplayStudy(true, time: write.ReadToken<double>("FOR"));
+			}
+			else if (step.Word == "WAIT" && step is TokenLS<double> time)
+				waiting_time = time;
+			else if (step.Word == "JOURNAL" && step is ComplexLS journal)
+			{
+				string entry = journal.Read<TokenLS<string>>("ENTRY");
+				Journal[entry] = (int)journal.Read<TokenLS<double>>("TO");
+			}
+			else if (step.Word == "IFJOURNAL" && step is ComplexLS if_journal)
+			{
+				string entry = if_journal.Read<TokenLS<string>>("ENTRY");
+				int to_check = (int)if_journal.Read<TokenLS<double>>("IS");
+				if ((Journal.TryGetValue(entry, out int val) || to_check == 0) && val == to_check)
+					foreach (var j_event in if_journal.Read<ComplexLS>("THEN").SubRunes)
+						DoEvent(j_event);
+				else
+					foreach (var j_event in if_journal.Read<ComplexLS>("ELSE").SubRunes)
+						DoEvent(j_event);
+			}
+			else if (step.Word == "SPAWN" && step is ComplexLS complex)
+				ActiveLevel.Props.SpawnProp(complex.Read<ComplexLS>("PROP"));
+			else if (step.Word == "CUTSCENE" && step is TokenLS<string> cutscene)
+			{
+				if (bool.TryParse(cutscene, out cinema))
+				{
+					Player.MoveTo(Player.GetPosition().CreateVector2());
+					investigatemode = false;
+				}
+			}
+			else if (step.Word == "MOVE" && step is ComplexLS movement)
+			{
+				string p_name = movement.Read<TokenLS<string>>("PROP");
+				var prop = ActiveLevel.Props.All.Where(p => p.Name == p_name).FirstOrDefault();
+				if (prop != null)
+					prop.MoveTo(new Vector2((float)movement.Read<TokenLS<double>>("X"), (float)movement.Read<TokenLS<double>>("Y")));
+			}
+			else if (step.Word == "DESTROY" && step is TokenLS<string> destroy_name)
+				ActiveLevel.Props.Destroy(ActiveLevel.Props.All.Where(p => p.Name == destroy_name).FirstOrDefault());
+			else if (step.Word == "MAKEPLAYER" && step is TokenLS<string> player_name)
+				Player = ActiveLevel.Props.All.Where(p => p.Name == player_name).FirstOrDefault() ?? Player;
+		}
 		private void BindDisplay()
 		{
 			Window.UpdateFrame += Update;
@@ -48,83 +113,107 @@ namespace Gale
 			Window.MouseDown -= OnMouseDown;
 			Window.RenderFrame -= Render;
 		}
-
+		private bool cinema = false;
 		protected void OnMouseDown(object sender, MouseButtonEventArgs e)
 		{
-			if (!investigatemode && e.Button == MouseButton.Left)
-			{
-				var pos = new Vector4(
-					(e.X - (Window.Width * 0.5f)) / (Window.Width * 0.5f),
-					-((e.Y - (Window.Height * 0.5f)) / (Window.Height * 0.5f)),
-					0.0f, 1.0f);
-				Player.MoveTo((inv_proj * pos).Xy + Camera);
-			}
-			else if (e.Button == MouseButton.Middle)
+			if (cinema)
+				return;
+			if (e.Button == MouseButton.Middle)
 			{
 				investigatemode = !investigatemode;
+				if (!investigatemode)
+					GUI.DisplayStudy(false);
 				_music = investigatemode ? 0.4f : 0.0f;
 			}
-			else if (investigatemode && e.Button == MouseButton.Left)
+			else
 			{
+				bool fnd_any = false;
 				var pos = ((inv_proj * new Vector4(
 					(e.X - (Window.Width * 0.5f)) / (Window.Width * 0.5f),
 					-((e.Y - (Window.Height * 0.5f)) / (Window.Height * 0.5f)),
 					0.0f, 1.0f)).Xy + Camera).CreateVec2();
 				foreach (var prop in ActiveLevel.Props.All)
-					if (prop.PhysicsShape.TestPoint(prop.Physics.GetXForm(), pos))
-					{
-						prop.Interact();
-						break;
-					}
-
+					if (prop != Selector.Highlight && prop != Selector.Glass)
+						if (prop.PhysicsShape.TestPoint(prop.Physics.GetXForm(), pos))
+						{
+							if (investigatemode && e.Button == MouseButton.Left && !string.IsNullOrEmpty(prop.Desc))
+								DoEvent(new ComplexLS("WRITE", new LScript[2]{
+									new TokenLS<string>("TEXT", prop.Desc),
+									new TokenLS<double>("FOR", 5.0)}));
+							else if (!investigatemode)
+							{
+								if (e.Button == MouseButton.Right)
+									Console.WriteLine($"{prop.Name} : ({prop.GetPosition().X}, {prop.GetPosition().Y})");
+								else
+								{
+									if (prop.OnInteract == null)
+										break;
+									fnd_any = true;
+									foreach (var action in prop.OnInteract.SubRunes)
+										DoEvent(action);
+									break;
+								}
+							}
+						}
+				if (!investigatemode && e.Button == MouseButton.Left && !fnd_any)
+					Player.MoveTo(pos.CreateVector2());
 			}
+
+			//}
 		}
-		(Prop, Prop) Selector;
-		public TextService Text;
-		double select_timr = 0.0;
-		bool investigatemode = false;
-		TextRender line;
+		double waiting_time = 0.0;
 		public void Update(object sender, FrameEventArgs e)
 		{
+			if (waiting_time > 0.0)
+				waiting_time -= e.Time;
+			else if (triggers.Count > 0)
+			{
+				var t = triggers.First();
+				DoEvent(t);
+				triggers.Remove(t);
+			}
+
+			GUI.Update(e.Time);
 			ActiveLevel.Update(e.Time);
-			var pos = Player.GetPosition();
-			var r_pos = new Vector2(pos.X, pos.Y);
+			var r_pos = Player.GetPosition().CreateVector2() + (Player.Image.UnitSize / 2);
 			Camera += Vector2.Clamp((r_pos - Camera), new Vector2(-1), new Vector2(1)) * (float)e.Time * 2;
 			PhysicsContext.Step((float)e.Time, 5, 5);
-			Selector.Item1.Update(e.Time);
-			Selector.Item2.Update(e.Time);
+			Selector.Highlight.Update(e.Time);
+			Selector.Glass.Update(e.Time);
 			if (investigatemode && (select_timr -= e.Time) <= 0)
 			{
-				select_timr = 0.0;
+				select_timr = 0.1;
 				var mouse = ((inv_proj * new Vector4(
 						(Window.Mouse.X - (Window.Width * 0.5f)) / (Window.Width * 0.5f),
 						-((Window.Mouse.Y - (Window.Height * 0.5f)) / (Window.Height * 0.5f)),
 						0.0f, 1.0f)).Xy + Camera).CreateVec2();
-
+				bool fnd = false;
 				foreach (var prop in ActiveLevel.Props.All)
-					if (prop != Selector.Item1 && prop != Selector.Item2 &&
-						prop.OnInteract != null &&
+					if (prop != Selector.Highlight && prop != Selector.Glass &&
+						!string.IsNullOrEmpty(prop.Desc) &&
 						prop.PhysicsShape.TestPoint(prop.Physics.GetXForm(), mouse))
 					{
-						Selector.Item1.Visible = true;
-						Selector.Item2.Visible = true;
+						fnd = true;
 						Window.RenderWorker.ShaderProgram.Highlight = prop.Image;
-						Selector.Item1.MoveTo(prop.GetPosition().CreateVector2() + new Vector2(prop.Image.UnitSize.X / 2.0f, prop.Image.UnitDepth / 2.0f));
-						Selector.Item2.MoveTo(prop.GetPosition().CreateVector2() + new Vector2(prop.Image.UnitSize.X / 2.0f, prop.Image.UnitSize.Y - 0.5f));
+						Selector.Highlight.MoveTo(prop.GetPosition().CreateVector2() + new Vector2(prop.Image.UnitSize.X / 2.0f, prop.Image.UnitDepth / 2.0f));
+						Selector.Glass.MoveTo(prop.GetPosition().CreateVector2() + new Vector2(prop.Image.UnitSize.X / 2.0f, prop.Image.UnitSize.Y - 0.5f));
 						break;
 					}
+				Selector.Highlight.Visible = fnd;
+				Selector.Glass.Visible = fnd;
 			}
 			else if (!investigatemode)
 			{
-				Selector.Item1.MoveTo(Player.GetPosition().CreateVector2());
-				Selector.Item2.MoveTo(Player.GetPosition().CreateVector2());
-				Selector.Item1.Visible = false;
-				Selector.Item2.Visible = false;
+				Selector.Highlight.MoveTo(Player.GetPosition().CreateVector2());
+				Selector.Glass.MoveTo(Player.GetPosition().CreateVector2());
+				Selector.Highlight.Visible = false;
+				Selector.Glass.Visible = false;
 			}
 		}
 		Matrix4 inv_proj;
 		Stopwatch timr = new Stopwatch();
 		float _music;
+		double fps = 0.0;
 		public void Render(object sender, FrameEventArgs e)
 		{
 			timr.Start();
@@ -141,13 +230,11 @@ namespace Gale
 
 			rendercontext.ShaderProgram.Model.Write(Matrix4.Identity);
 			ActiveLevel.Render(rendercontext);
-			line?.Render(rendercontext);
 			rendercontext.BuildUIScene();
-			foreach (var ui in UIElements)
-				ui.Render(rendercontext);
-			
+			GUI.Render(rendercontext);
 			rendercontext.Display();
-			Window.Title = $"FPS: {(1.0 / e.Time).ToString("F")}";
+			fps = (fps + (1.0 / e.Time)) / 2.0;
+			Window.Title = $"{_titleroot} FPS: {fps.ToString("F")}";
 			timr.Stop();
 			if (timr.ElapsedMilliseconds < 15)
 				Thread.Sleep((1000 / 60) - (int)timr.ElapsedMilliseconds);
@@ -156,7 +243,16 @@ namespace Gale
 		public Level ActiveLevel;
 		static void Main(string[] args)
 		{
-			using (var window = new Display())
+			var gm = LScript.CreateFrom(File.ReadAllText("Data/game.lscp")).Read<ComplexLS>("GAME");
+			var constants = gm.Read<ComplexLS>("CONSTANTS");
+
+			Sprite.TileSize = constants.ReadToken<Pixels>("TILESIZE");
+			Sprite.UseLinear = constants.ReadToken<string>("FILTER") == "linear";
+			Display.ViewTiles = (float)constants.ReadToken<double>("VIEWTILES");
+			string loadlevel = gm.ReadToken<string>("LOADLEVEL");
+
+			var wndw = constants.Read<ComplexLS>("WINDOW");
+			using (var window = new Display(wndw.ReadToken<Pixels>("WIDTH"), wndw.ReadToken<Pixels>("HEIGHT"), wndw.ReadToken<string>("TITLE")))
 			{
 				using (var vert = Shader.Step.CompileFrom(ShaderResources.default_vert_shader, ShaderType.VertexShader))
 				using (var frag = Shader.Step.CompileFrom(ShaderResources.default_frag_shader, ShaderType.FragmentShader))
@@ -165,24 +261,32 @@ namespace Gale
 				{
 					game.Window = window;
 
-					var script = LScript.CreateFrom(File.ReadAllText("Data/Office/room.txt"));
+					var script = LScript.CreateFrom(File.ReadAllText(loadlevel));
 					game.ActiveLevel = game.Content.MakeLevel(script.Read<ComplexLS>("ROOM"));
 					var back = game.ActiveLevel.Props.SpawnProp(
-						new PropTemplate(game.Content.MakeSprite("Img/selection.png", 64), "Selection"
+						new PropTemplate(game.Content.MakeSprite("Img/selection.png", 64, 0, 0), "Selection", ""
 						, 1.0f, 1.0f, false, true), Vec2.Zero);
 					back.Speed = 100f;
 					back.ZPosition = -1.0f;
 					var front = game.ActiveLevel.Props.SpawnProp(
-						new PropTemplate(game.Content.MakeSprite("Img/magnify.png", 64), "Magnify"
+						new PropTemplate(game.Content.MakeSprite("Img/magnify.png", 64, 0, 0), "Magnify", ""
 						, 1.0f, 1.0f, false, true), Vec2.Zero);
 					front.Speed = 100f;
-					front.ZPosition = 1.0f;
+					front.ZPosition = 9.0f;
 					game.Selector = (back, front);
 
-					game.UIElements.Add(new UI(game.Content.MakeSprite("Img/ui_icon.png", 0), 0, 0, 0.2f, 0.2f));
+					var text = TextService.FromFile(Environment.ExpandEnvironmentVariables("%WINDIR%/Fonts/Arial.ttf"), game.Window.RenderWorker);
+					game.Content.Text = text;
+					var ui_scripts = gm.Read<ComplexLS>("UI");
+					foreach (var uisc in ui_scripts.ReadAll<ComplexLS>("ELEMENT"))
+						game.GUI.SpawnUI(uisc);
+					//var box = new UI(game.Content.MakeSprite("Img/ui_blank.png", 0, 0, 0), 0.0f, 0.0f, game.UISize.X, 1);
+					//game.GUI.Elements.Add(box);
 
-					game.Text = TextService.FromFile(Environment.ExpandEnvironmentVariables("%WINDIR%/Fonts/Arial.ttf"), game.Window.RenderWorker);
-					game.line = game.Text.CompileString("Hello, World!", new Vector2(5,5), game.Window.RenderWorker);
+					//var line = text.CompileString("Hellopq, World!", new Vector2(0.2f, 0.2f), game.Window.RenderWorker);
+					//box.Children = new IRender[1] { line };
+					game.GUI.DisplayStudy(false);
+					game.Camera = game.Player.GetPosition().CreateVector2();
 					window.Run(60);
 				}
 			}
@@ -199,8 +303,7 @@ namespace Gale
 				{
 					UnbindDisplay();
 					ActiveLevel.Dispose();
-					foreach (var ui in UIElements)
-						ui.Image.Dispose();
+					GUI.Dispose();
 				}
 				disposedValue = true;
 			}

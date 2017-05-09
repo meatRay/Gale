@@ -19,23 +19,48 @@ namespace Gale.Props
 			=> new Vector2(physics_vec.X, physics_vec.Y);
 		public static Vec2 CreateVec2(this Vector2 display_vec)
 			=> new Vec2(display_vec.X, display_vec.Y);
+		public static AnimationDirections CalcDirection(this Vec2 physics_vec)
+		{
+			int x = (int)System.Math.Round(physics_vec.X);
+			int y = (int)System.Math.Round(physics_vec.Y);
+			if (y == 1)
+				return AnimationDirections.North;
+			else if (x == -1)
+				return AnimationDirections.West;
+			else if (y == -1)
+				return AnimationDirections.South;
+			else 
+				return AnimationDirections.East;
+		}
 	}
 	class Prop : PropTemplate, IRender, IDisposable
 	{
 		public ComplexLS OnInteract { get; set; }
+		public ComplexLS OnTrigger { get; set; }
 		public Level LevelContext { get; private set; }
 		public Vec2 GetPosition() => Physics.GetPosition();
 		public Vector2 TargetPosition { get; private set; } = new Vector2(1, 1);
 		public bool IsMoving { get; private set; }
 		public bool Visible = true;
+		public Body Physics;
+		public Shape PhysicsShape;
+		bool isanimated = false;
+		Vec2 lastposition;
+		AnimationDirections lastdirection = AnimationDirections.South;
 
 		public Prop(PropTemplate template, Level level_context, Body physics, Shape physics_shape)
-			: base(template.Image, template.Name, template.Mass, template.Friction, template.Collides, template.CanMove)
+			: base(template.Image, template.Name, template.Desc, template.Mass, template.Friction, template.Collides, template.CanMove)
 		{
 			Image.AcquireUse();
+			if( Image is Animation animation )
+			{
+				isanimated = true;
+				animation.UseSequence("idle", AnimationDirections.South);
+			}
 			LevelContext = level_context;
 			Physics = physics;
 			PhysicsShape = physics_shape;
+			lastposition = GetPosition();
 		}
 
 		public void Render(Renderer render_context)
@@ -43,18 +68,12 @@ namespace Gale.Props
 			if (Visible)
 			{
 				var pos = GetPosition();
-				_translation = Matrix4.CreateTranslation(pos.X, pos.Y, 0.0f);
-				render_context.ShaderProgram.Model.Write(_translation);
+				render_context.ShaderProgram.Model.Push( Matrix4.CreateTranslation(pos.X, pos.Y, 0.0f) );
+				render_context.ShaderProgram.Model.Write();
 				GL.Uniform1(render_context.ShaderProgram.ZLocation, ZPosition);
 				Image.Render(render_context);
+				render_context.ShaderProgram.Model.Pop();
 			}
-		}
-
-		public void Interact()
-		{
-			if (OnInteract == null)
-				return;
-			Console.WriteLine(OnInteract.Read<TokenLS<string>>("WRITE"));
 		}
 
 		public void MoveTo(Vector2 target_position, bool from_sprite_center = true)
@@ -67,8 +86,24 @@ namespace Gale.Props
 			}
 			IsMoving = true;
 		}
+
 		public void Update(double delta_time)
 		{
+			if (isanimated && !Physics.IsSleeping())
+			{
+				var pos = GetPosition() - lastposition;
+				if (pos.LengthSquared() >= 0.01f)
+				{
+					lastposition = GetPosition();
+					pos.Normalize();
+					var dir = pos.CalcDirection();
+					if (dir != lastdirection)
+					{
+						((Animation)Image).UseSequence("idle", dir);
+						lastdirection = dir;
+					}
+				}
+			}
 			if (IsMoving)
 			{
 				var pos = GetPosition();
@@ -95,13 +130,6 @@ namespace Gale.Props
 				}
 			}
 		}
-		public Body Physics;
-		public Shape PhysicsShape;
-
-		/*Since it's a struct, 
-		 * does this keep the Render function from allocating new space for a mat4 each render pass?
-		 * just silly experiments.*/
-		private Matrix4 _translation;
 
 		#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls

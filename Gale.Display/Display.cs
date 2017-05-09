@@ -18,11 +18,11 @@ namespace Gale.Visuals
 {
 	public class Display : GameWindow
 	{
-		public Display()
-			: base(800, // initial width
-				600, // initial height
+		public Display(int width, int height, string title)
+			: base(width, // initial width
+				height, // initial height
 				GraphicsMode.Default,
-				"Gale Drivel",  // initial title
+				title,  // initial title
 				GameWindowFlags.FixedWindow,
 				DisplayDevice.Default,
 				4, // OpenGL major version
@@ -40,12 +40,16 @@ namespace Gale.Visuals
 			GL.Enable(EnableCap.Texture2D);
 			GL.Enable(EnableCap.Blend);
 
-			GL.BlendEquation(BlendEquationMode.FuncAdd);
-			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+			//GL.BlendEquation(BlendEquationMode.FuncSubtract);
+			if (!Sprite.UseLinear)
+				GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
+			else
+				GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
+			//GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			VSync = VSyncMode.Off;
 		}
 
-		public const float ViewTiles = 8.0f;
+		public static float ViewTiles = 16.0f;
 		public float AspectRatio => (float)Width / Height;
 		public Vector2 Camera = new Vector2(-0.0f, -0.0f);
 

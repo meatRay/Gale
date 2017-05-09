@@ -16,7 +16,7 @@ namespace Gale.Visuals
 		public Matrix4 GameProjection { get; private set; }
 		public Matrix4 UIProjection { get; private set; }
 		public Matrix4 GameView { get; private set; }
-	public Shader ShaderProgram;
+		public Shader ShaderProgram;
 
 		public Renderer(Display window_context)
 		{
@@ -28,9 +28,9 @@ namespace Gale.Visuals
 		public void RebuildGameView(Vector2 translation)
 			=> GameView = Matrix4.CreateTranslation(-translation.X, -translation.Y, 0.0f);
 		public void RebuildGameProjection()
-			=> GameProjection = Matrix4.CreateOrthographic(Visuals.Display.ViewTiles * WindowContext.AspectRatio, Visuals.Display.ViewTiles, -10.0f, 10.0f);
+			=> GameProjection = Matrix4.CreateOrthographic(Visuals.Display.ViewTiles, Visuals.Display.ViewTiles / WindowContext.AspectRatio, -10.0f, 10.0f);
 		public void RebuildUIProjection()
-			=> UIProjection = Matrix4.CreateOrthographicOffCenter(0, 1, 0, 1, -1, 1);
+			=> UIProjection = Matrix4.CreateOrthographicOffCenter(0, 10, 0, 10 / WindowContext.AspectRatio, -1, 1);
 
 		public void BuildGameScene()
 		{
@@ -38,6 +38,13 @@ namespace Gale.Visuals
 			GL.UseProgram(ShaderProgram.ShaderID);
 			ShaderProgram.Projection.Write(GameProjection);
 			ShaderProgram.View.Write(GameView);
+			ShaderProgram.UVOffset.Clear();
+			ShaderProgram.UVOffset.Default = Matrix4.Identity;
+			ShaderProgram.UVOffset.Push(ref ShaderProgram.UVOffset.Default);
+			ShaderProgram.UVOffset.Write();
+			ShaderProgram.Model.Clear();
+			ShaderProgram.Model.Default = Matrix4.Identity;
+			ShaderProgram.Model.Push(ref ShaderProgram.Model.Default);
 			GL.Uniform1(ShaderProgram.ZLocation, 0.0f);
 		}
 
@@ -47,6 +54,10 @@ namespace Gale.Visuals
 			GL.UseProgram(ShaderProgram.ShaderID);
 			ShaderProgram.Projection.Write(UIProjection);
 			ShaderProgram.View.Write(Matrix4.Identity);
+			ShaderProgram.UVOffset.Default = Matrix4.Identity;
+			ShaderProgram.UVOffset.Write();
+			ShaderProgram.Model.Default = Matrix4.Identity;
+			ShaderProgram.Model.Push(ref ShaderProgram.Model.Default);
 			GL.Uniform1(ShaderProgram.ZLocation, 0.0f);
 		}
 

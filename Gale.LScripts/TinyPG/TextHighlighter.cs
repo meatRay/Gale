@@ -495,20 +495,29 @@ namespace Gale.LScripts
                     case TokenType.PIXELS:
                         sb.Append(@"{{\cf6 ");
                         break;
-                    case TokenType.NUMBER:
+                    case TokenType.EOPEN:
                         sb.Append(@"{{\cf7 ");
                         break;
-                    case TokenType.NAME:
+                    case TokenType.ECLOSE:
                         sb.Append(@"{{\cf8 ");
                         break;
-                    case TokenType.META:
+                    case TokenType.NUMBER:
                         sb.Append(@"{{\cf9 ");
                         break;
-                    case TokenType.NEWNAME:
+                    case TokenType.NAME:
                         sb.Append(@"{{\cf10 ");
                         break;
-                    case TokenType.WORD:
+                    case TokenType.META:
                         sb.Append(@"{{\cf11 ");
+                        break;
+                    case TokenType.NEWNAME:
+                        sb.Append(@"{{\cf12 ");
+                        break;
+                    case TokenType.WORD:
+                        sb.Append(@"{{\cf13 ");
+                        break;
+                    case TokenType.REMOVE:
+                        sb.Append(@"{{\cf14 ");
                         break;
 
                 default:
@@ -520,7 +529,7 @@ namespace Gale.LScripts
         // define the color palette to be used here
         private void AddRtfHeader(StringBuilder sb)
         {
-            sb.Insert(0, @"{\rtf1\ansi\deff0{\fonttbl{\f0\fnil\fcharset0 Consolas;}}{\colortbl;\red100\green100\blue100;\red100\green100\blue100;\red50\green125\blue50;\red50\green125\blue50;\red175\green50\blue25;\red175\green50\blue25;\red175\green50\blue25;\red25\green175\blue150;\red100\green100\blue100;\red25\green175\blue150;\red0\green0\blue200;}\viewkind4\uc1\pard\lang1033\f0\fs20");
+            sb.Insert(0, @"{\rtf1\ansi\deff0{\fonttbl{\f0\fnil\fcharset0 Consolas;}}{\colortbl;\red100\green100\blue100;\red100\green100\blue100;\red50\green125\blue50;\red50\green125\blue50;\red175\green50\blue25;\red175\green50\blue25;\red100\green100\blue100;\red100\green100\blue100;\red175\green50\blue25;\red25\green175\blue150;\red100\green100\blue100;\red25\green175\blue150;\red0\green0\blue200;\red200\green0\blue0;}\viewkind4\uc1\pard\lang1033\f0\fs20");
         }
 
         private void AddRtfEnd(StringBuilder sb)

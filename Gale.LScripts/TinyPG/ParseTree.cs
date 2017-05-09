@@ -185,6 +185,12 @@ namespace Gale.LScripts
                 case TokenType.QuoteToken:
                     Value = EvalQuoteToken(tree, paramlist);
                     break;
+                case TokenType.NameToken:
+                    Value = EvalNameToken(tree, paramlist);
+                    break;
+                case TokenType.NameEdit:
+                    Value = EvalNameEdit(tree, paramlist);
+                    break;
                 case TokenType.Token:
                     Value = EvalToken(tree, paramlist);
                     break;
@@ -234,6 +240,16 @@ namespace Gale.LScripts
         	return quot.Substring(1, quot.Length-2);
         }
 
+        protected virtual object EvalNameToken(ParseTree tree, params object[] paramlist)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected virtual object EvalNameEdit(ParseTree tree, params object[] paramlist)
+        {
+            throw new NotImplementedException();
+        }
+
         protected virtual object EvalToken(ParseTree tree, params object[] paramlist)
         {
             if( this.GetValue(tree, TokenType.QuoteToken, 0) != null )
@@ -243,7 +259,7 @@ namespace Gale.LScripts
         	if( this.GetValue(tree, TokenType.NUMBER, 0) != null )
         		return this.GetValue(tree, TokenType.NUMBER, 0);
         	else
-        		return this.GetValue(tree, TokenType.NAME, 0);
+        		return this.GetValue(tree, TokenType.NameToken, 0);
         }
 
 

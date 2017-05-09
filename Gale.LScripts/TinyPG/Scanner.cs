@@ -33,6 +33,8 @@ namespace Gale.LScripts
             Skipped = new List<Token>();
 
             SkipList = new List<TokenType>();
+            SkipList.Add(TokenType.HIDELINE);
+            SkipList.Add(TokenType.HIDEBLOCK);
             SkipList.Add(TokenType.WHITESPACE);
 
             regex = new Regex(@":", RegexOptions.Compiled);
@@ -55,9 +57,17 @@ namespace Gale.LScripts
             Patterns.Add(TokenType.QUOTE, regex);
             Tokens.Add(TokenType.QUOTE);
 
-            regex = new Regex(@"\d+px", RegexOptions.Compiled);
+            regex = new Regex(@"-?\d+px", RegexOptions.Compiled);
             Patterns.Add(TokenType.PIXELS, regex);
             Tokens.Add(TokenType.PIXELS);
+
+            regex = new Regex(@"\(", RegexOptions.Compiled);
+            Patterns.Add(TokenType.EOPEN, regex);
+            Tokens.Add(TokenType.EOPEN);
+
+            regex = new Regex(@"\)", RegexOptions.Compiled);
+            Patterns.Add(TokenType.ECLOSE, regex);
+            Tokens.Add(TokenType.ECLOSE);
 
             regex = new Regex(@"-?(?:\d*\.)?\d+", RegexOptions.Compiled);
             Patterns.Add(TokenType.NUMBER, regex);
@@ -78,6 +88,10 @@ namespace Gale.LScripts
             regex = new Regex(@"\w+", RegexOptions.Compiled);
             Patterns.Add(TokenType.WORD, regex);
             Tokens.Add(TokenType.WORD);
+
+            regex = new Regex(@"-\w+", RegexOptions.Compiled);
+            Patterns.Add(TokenType.REMOVE, regex);
+            Tokens.Add(TokenType.REMOVE);
 
             regex = new Regex(@"\s+", RegexOptions.Compiled);
             Patterns.Add(TokenType.WHITESPACE, regex);
@@ -213,21 +227,26 @@ namespace Gale.LScripts
             Group   = 5,
             PixelToken= 6,
             QuoteToken= 7,
-            Token   = 8,
+            NameToken= 8,
+            NameEdit= 9,
+            Token   = 10,
 
             //Terminal tokens:
-            GOPEN   = 9,
-            GCLOSE  = 10,
-            HIDELINE= 11,
-            HIDEBLOCK= 12,
-            QUOTE   = 13,
-            PIXELS  = 14,
-            NUMBER  = 15,
-            NAME    = 16,
-            META    = 17,
-            NEWNAME = 18,
-            WORD    = 19,
-            WHITESPACE= 20
+            GOPEN   = 11,
+            GCLOSE  = 12,
+            HIDELINE= 13,
+            HIDEBLOCK= 14,
+            QUOTE   = 15,
+            PIXELS  = 16,
+            EOPEN   = 17,
+            ECLOSE  = 18,
+            NUMBER  = 19,
+            NAME    = 20,
+            META    = 21,
+            NEWNAME = 22,
+            WORD    = 23,
+            REMOVE  = 24,
+            WHITESPACE= 25
     }
 
     public class Token
