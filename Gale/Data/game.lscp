@@ -1,0 +1,28 @@
+#IMPORT "Data/constants.lscp"
+#IMPORT "Data/ui.lscp"
+
+GAME:
+	LOADLEVEL "Data/Office/room.lscp"
+	UI:
+		ELEMENT: 
+			ID $ui.descbar
+			SPRITE:  FILENAME "Img/ui_blank.png" ;
+			BOTTOM 0.0 TOP 1.0
+			LEFT 0.0 RIGHT $ui.max.x
+			CHILDREN:
+				TEXT:
+					LINE "Hello, World!"
+					X 0.2 Y 0.0
+			;	;
+		;
+	;
+	CONSTANTS:
+		WINDOW:
+			WIDTH 1024px HEIGHT 576px
+			TITLE "Gale Dribble"
+		;
+		TILESIZE 64px
+		VIEWTILES 12.0
+		FILTER $constants.filter.linear
+	;
+;

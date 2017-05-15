@@ -1,0 +1,63 @@
+﻿#IMPORT "Data/animations.lscp"
+
+TEMPLATE def$office.bed.template:
+	NAME "messy bed"
+	DESC "A haphazard sleeping space."
+	SPRITE: FILENAME "Img/Room/Office/bed.png" DEPTH 172px ;
+	MASS 15.0 COLLIDES
+;
+TEMPLATE def$office.crate.template:
+	NAME "storage crate"
+	DESC "Gologesh tower-wood is almost vaccuum-tight."
+	SPRITE: FILENAME "Img/Room/Office/crate.png" DEPTH 40px ;
+	MASS 10.0 CANMOVE COLLIDES
+;
+TEMPLATE def$office.table.template:
+	NAME "foldout table"
+	SPRITE: 
+		FILENAME "Img/Prop/office_table.png" DEPTH 64px 
+	;
+	MASS 10.0 COLLIDES
+;
+TEMPLATE def$office.button.template:
+	NAME "dangerous button"
+	SPRITE: FILENAME "Img/Room/Office/danger_button.png" DEPTH 32px ;
+	MASS 0.0
+;
+TEMPLATE def$office.chair.template:
+	NAME "wheelie-chair"
+	ANIMATION: 
+		FILENAME "Img/Room/Office/office_chair_full.png"
+		SEQUENCE:
+			NAME $animation.idle
+			DIRECTIONS: SOUTH ;
+			WIDTH 43px HEIGHT 91px OFFSET: X -1px ;
+			STEP: X 0px Y 0px  ;
+		;
+		SEQUENCE:
+			NAME $animation.idle
+			DIRECTIONS: EAST ;
+			WIDTH 43px HEIGHT 91px OFFSET: X -1px ;
+			STEP: X 43px Y 91px ;
+		;
+		SEQUENCE:
+			NAME $animation.idle
+			DIRECTIONS: NORTH ;
+			WIDTH 43px HEIGHT 91px OFFSET: X -1px ;
+			STEP: X 0px Y 91px ;
+		;
+		SEQUENCE:
+			NAME $animation.idle
+			DIRECTIONS: WEST ;
+			WIDTH 43px HEIGHT 91px OFFSET: X -1px ;
+			STEP: X 43px Y 0px ;
+		;
+	;
+	MASS 0.2 CANMOVE COLLIDES FRICTION 0.5
+	WIDTH 38px HEIGHT 24px
+;
+TEMPLATE def$office.bookcase.template:
+	NAME "bookcase"
+	SPRITE: FILENAME "Img/Room/Office/bookcase.png" DEPTH 48px ;
+	MASS 50.0 COLLIDES
+;

@@ -48,14 +48,17 @@ namespace Gale.Visuals
 			}
 		}
 
-		public void RenderChar( int at, Renderer render )
+		public void RenderChar( int at, Renderer render, int downs_count = 1 )
 		{
 			if (at >= Texts.Length)
 				return;
 			var text = Texts[at];
 			//Matrix4 model;
 			if (text.Character == '\n')
-				render.ShaderProgram.Model.Push(_fontscale * Matrix4.CreateTranslation(0, -0.35f, 0));
+			{
+				render.ShaderProgram.Model.Push(_fontscale * Matrix4.CreateTranslation(0, downs_count * -0.35f, 0));
+				++downs_count;
+			}
 			else
 			{
 				var to_use = text.Offset * render.ShaderProgram.Model.Top;
@@ -64,7 +67,7 @@ namespace Gale.Visuals
 				render.ShaderProgram.Model.Pop();
 				render.ShaderProgram.Model.Push(text.Next * render.ShaderProgram.Model.Top);
 			}
-			RenderChar(++at, render);
+			RenderChar(++at, render, downs_count);
 			render.ShaderProgram.Model.Pop();
 		}
 	}

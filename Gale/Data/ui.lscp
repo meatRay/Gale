@@ -1,0 +1,5 @@
+UI:
+	VAR define$ui.max.x 10.0
+	VAR define$ui.max.y 5.625
+	ID define$ui.descbar "descbar"
+;

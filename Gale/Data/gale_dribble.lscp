@@ -1,0 +1,10 @@
+﻿TEMPLATE def$gale_dribble.template:
+	NAME "Gale Dribble"
+	SPRITE: 
+		FILENAME "Img/Character/Gale_Dribble.png" 
+		DEPTH 18px
+	;
+	MASS 1.0 
+	COLLIDES 
+	CANMOVE
+;

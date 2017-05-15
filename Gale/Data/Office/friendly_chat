@@ -1,0 +1,17 @@
+ACTOR def$gale.actor:
+	MOODS:
+		MOOD:
+			NAME $mood.idle
+			SPRITE: FILENAME "" ;
+		;
+	;
+	NAME "Gale Dribble"
+;
+
+DIALOGUE:
+	LINE:
+		ACTOR $gale.actor
+		SAY "Text"
+		MOOD $mood.idle
+	;
+;

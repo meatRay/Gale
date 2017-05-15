@@ -1,0 +1,10 @@
+﻿TEMPLATE def$skeleton.template:
+	NAME "Spooky Scary Skeleton"
+	SPRITE: 
+		FILENAME "Img/Character/sk_Untitled.png" 
+		DEPTH 34px
+	;
+	MASS 0.5 
+	COLLIDES 
+	CANMOVE
+;

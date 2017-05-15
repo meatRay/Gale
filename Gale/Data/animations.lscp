@@ -1,0 +1,4 @@
+ANIMATIONS:
+	NAME define$animation.idle "idle"
+	NAME define$animation.walk "walk"
+;

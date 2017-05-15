@@ -1,0 +1,152 @@
+﻿// Import some scripts defined in outside files
+#IMPORT "Data/gale_dribble.lscp"
+#IMPORT "Data/ayylmao.lscp"
+#IMPORT "Data/skeleton.lscp"
+#IMPORT "Data/Office/templates.lscp"
+#IMPORT "Data/Office/friendly_chat.lscp"
+
+ROOM:
+	TITLE "Homely Office"
+	BACKDROP: FILENAME "Img/Room/Office/backdrop.png" ;
+	BOUNDS:
+		LEFT 0.16 RIGHT 9.84 BOTTOM 0.0 TOP 13.0
+	;
+	
+	/*CONNECT_ROOM:
+		FILENAME "Data/Debug/room.lscp" ;
+		#MATH: X:
+			IS 0.0
+			#MATH: MINUS:
+				#GET:
+					PROP "this.Image.Name"
+					AS $types.double
+				;
+			;	;
+		;	;
+	;*/
+	
+	PROPS:
+		// gale
+		PROP:
+			/* Rather than define all the templates here, we import them
+			 * This cuts down on having to read things like sprite data
+			 *  while we're trying to read more important stuff */
+			TEMPLATE $gale_dribble.template( DESC "I don't feel like investigating my inner self again." )
+			PLAYER
+			X 8.45 Y 6.80 
+		;
+		// crate
+		PROP:
+			TEMPLATE $office.crate.template X 0.16 Y 6.80 
+			ON_INTERACT:
+				WRITE: TEXT "It's full of space-junk from when you
+				space-moved here a couple space-years ago." FOR 5.0 ;
+			;
+		;
+		// door trigger 1
+		PROP:
+			TEMPLATE:
+				NAME "trigger.door 1"
+				SPRITE: FILENAME "Img/trigger_128.png" DEPTH 64px ;
+				MASS 0.0 COLLIDES
+			;
+			X 7.0 Y 2.0
+			ON_TRIGGER: 
+				SPAWN: PROP: TEMPLATE $ayylmao.template X 8.2 Y 1.2 ; ;
+				DESTROY "trigger.door 1"
+				// Future notation... CUTSCENE: stuff-to-do-during-cutscene ;, same with WAIT: wait-until-done ;
+				CUTSCENE "true"
+				WAIT 0.5
+				MOVE:
+					PROP "AYY LMAO"
+					X 8.7 Y 3.7
+				;
+				WAIT 0.5
+				MOVE:
+					PROP "Gale Dribble"
+					X 7.1 Y 4.2
+				;
+				WAIT 1.5
+				CUTSCENE "false"
+				DIALOGUE $office.friendlychat
+			;
+		;
+		// table
+		PROP: TEMPLATE $office.table.template X 6.50 Y 5.73 ;
+		// bookcase
+		PROP: 
+			TEMPLATE $office.bookcase.template X 3.77 Y 12.19
+			ON_INTERACT:
+				RANDOM:
+					WRITE: TEXT "A classic trilogy of well-worn books by Oolon Colluphid." FOR 4.0 ;
+					WRITE: TEXT "An incomplete set of Sherlock Holmes.
+					The quality and print dates vary wildly." FOR 4.0 ;
+				;
+			;
+		;
+		// chair
+		PROP: TEMPLATE $office.chair.template X 7.45 Y 6.73 ;
+		// bed
+		PROP: 
+			TEMPLATE $office.bed.template X 8.44 Y 10.31  
+			ON_INTERACT: 
+				WRITE: TEXT "It's officially space-lunch o'clock!
+				Far too late for yet another nap." FOR 4.0 ; 
+			;
+		;
+		// button
+		PROP: 
+			TEMPLATE $office.button.template X 5.37 Y 9.31 Z 1.4
+			ON_INTERACT: 
+				IFJOURNAL : ENTRY "office.button" IS 0
+					THEN:
+						WRITE: TEXT "It made a clicking noise." FOR 5.0 ;
+						SPAWN:
+							PROP:
+								TEMPLATE $gale_dribble.template ( NAME "vexing clone" )  X 8.45 Y 6.80 
+								ON_INTERACT:
+									WRITE: TEXT "This is starting to get really weird." FOR 5.0 ;
+								; 
+						;	;
+						MAKEPLAYER "wheelie-chair"
+						JOURNAL: ENTRY "office.button" TO 1 ;
+					; 
+					ELSE:
+						SPAWN:
+							PROP:
+								TEMPLATE $skeleton.template X 2.45 Y 6.80 
+								ON_INTERACT: 
+									DIALOGUE:
+										LINE:
+											ACTOR def$gale.actor:
+												MOODS:
+													MOOD:
+														NAME $mood.idle
+														SPRITE: FILENAME "Img/Character/sk_Untitled.png" ;
+												;	;
+												NAME "Spoopy Skeleton"
+											;
+											TEXT "ACK ACK ACK ACK!"
+											MOOD $mood.idle
+										;
+								;	; 
+					;	;	;
+				;
+			;
+		;
+		PROP:
+			TEMPLATE:
+				SPRITE: FILENAME "Img/Room/Office/frontdrop.png" DEPTH 100px ;
+				MASS 0.0 COLLIDES
+			;
+			X 0.0 Y 0.0 
+		;
+		PROP:
+			TEMPLATE:
+				SPRITE: FILENAME "Img/Room/Office/midwall.png" DEPTH 12px ;
+				MASS 0.0 COLLIDES
+			;
+			X 4.1719 Y 7.984 
+		;
+	;
+;

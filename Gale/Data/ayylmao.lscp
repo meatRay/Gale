@@ -1,0 +1,10 @@
+﻿TEMPLATE def$ayylmao.template:
+	NAME "AYY LMAO"
+	SPRITE: 
+		FILENAME "Img/Character/ayylmao.png" 
+		DEPTH 24px
+	;
+	MASS 1.5 
+	COLLIDES 
+	CANMOVE
+;

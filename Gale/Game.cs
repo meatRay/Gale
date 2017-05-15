@@ -13,6 +13,7 @@ using Gale.Props;
 using Gale.LScripts;
 using System.IO;
 using Gale.Visuals;
+using Gale.UIs;
 
 namespace Gale
 {
@@ -23,12 +24,14 @@ namespace Gale
 		public Prop Player;
 		public Display Window;
 		public Vector2 Camera;
-		public Dictionary<string, int> Journal = new Dictionary<string, int>();
+		public Dictionary<string, int> Journal { get; private set; } = new Dictionary<string, int>();
 		public ContentManager Content { get; private set; }
 		public UIManager GUI { get; private set; }
 		public Vector2 UISize { get; private set; }
+		public Random RNG { get; private set; }
 
 		(Prop Highlight, Prop Glass) Selector;
+		Prop _selected;
 		double select_timr = 0.1;
 		bool investigatemode = false;
 		string _titleroot;
@@ -44,6 +47,7 @@ namespace Gale
 			Content = new ContentManager(this);
 			GUI = new UIManager(this);
 			PhysicsContext.SetContactListener(new TriggerCallback(Trigger));
+			RNG = new Random();
 		}
 		private void Trigger(Prop prop)
 		{
@@ -79,11 +83,15 @@ namespace Gale
 					foreach (var j_event in if_journal.Read<ComplexLS>("ELSE").SubRunes)
 						DoEvent(j_event);
 			}
+			else if (step.Word == "DIALOGUE" && step is ComplexLS chat)
+				GUI.Dialogue.Begin(Dialogue.FromScript(chat, Content));
 			else if (step.Word == "SPAWN" && step is ComplexLS complex)
 				ActiveLevel.Props.SpawnProp(complex.Read<ComplexLS>("PROP"));
+			else if (step.Word == "RANDOM" && step is ComplexLS random)
+				DoEvent(random.SubRunes[RNG.Next(random.SubRunes.Length)]);
 			else if (step.Word == "CUTSCENE" && step is TokenLS<string> cutscene)
 			{
-				if (bool.TryParse(cutscene, out cinema))
+				if (bool.TryParse(cutscene, out Cutscene))
 				{
 					Player.MoveTo(Player.GetPosition().CreateVector2());
 					investigatemode = false;
@@ -106,19 +114,34 @@ namespace Gale
 			Window.UpdateFrame += Update;
 			Window.MouseDown += OnMouseDown;
 			Window.RenderFrame += Render;
+			Window.KeyDown += OnKeyDown;
 		}
 		private void UnbindDisplay()
 		{
 			Window.UpdateFrame -= Update;
 			Window.MouseDown -= OnMouseDown;
 			Window.RenderFrame -= Render;
+			Window.KeyDown -= OnKeyDown;
 		}
-		private bool cinema = false;
+		public bool Cutscene = false;
+		protected void OnKeyDown(object sender, KeyboardKeyEventArgs e)
+		{
+			if (e.Key == Key.I)
+			{
+				investigatemode = !investigatemode;
+				if (!investigatemode)
+					GUI.DisplayStudy(false);
+				_music = investigatemode ? 0.4f : 0.0f;
+			}
+		}
 		protected void OnMouseDown(object sender, MouseButtonEventArgs e)
 		{
-			if (cinema)
-				return;
-			if (e.Button == MouseButton.Middle)
+			if (Cutscene)
+			{
+				if (GUI.Dialogue.Active && e.Button == MouseButton.Left)
+					GUI.Dialogue.Advance();
+			}
+			else if (e.Button == MouseButton.Middle)
 			{
 				investigatemode = !investigatemode;
 				if (!investigatemode)
@@ -148,7 +171,9 @@ namespace Gale
 								{
 									if (prop.OnInteract == null)
 										break;
-									fnd_any = true;
+									var dif = prop.GetPosition() - Player.GetPosition();
+									dif.Normalize();
+									Player.MoveTo((prop.GetPosition() - (dif*2.0f)).CreateVector2());
 									foreach (var action in prop.OnInteract.SubRunes)
 										DoEvent(action);
 									break;
@@ -173,6 +198,11 @@ namespace Gale
 				triggers.Remove(t);
 			}
 
+			if (investigatemode && _selected != null)
+			{
+				Selector.Highlight.MoveTo(_selected.GetPosition().CreateVector2() + new Vector2(_selected.Image.UnitSize.X / 2.0f, _selected.Image.UnitDepth / 2.0f));
+				Selector.Glass.MoveTo(_selected.GetPosition().CreateVector2() + new Vector2(_selected.Image.UnitSize.X / 2.0f, _selected.Image.UnitSize.Y - 0.5f));
+			}
 			GUI.Update(e.Time);
 			ActiveLevel.Update(e.Time);
 			var r_pos = Player.GetPosition().CreateVector2() + (Player.Image.UnitSize / 2);
@@ -195,10 +225,10 @@ namespace Gale
 					{
 						fnd = true;
 						Window.RenderWorker.ShaderProgram.Highlight = prop.Image;
-						Selector.Highlight.MoveTo(prop.GetPosition().CreateVector2() + new Vector2(prop.Image.UnitSize.X / 2.0f, prop.Image.UnitDepth / 2.0f));
-						Selector.Glass.MoveTo(prop.GetPosition().CreateVector2() + new Vector2(prop.Image.UnitSize.X / 2.0f, prop.Image.UnitSize.Y - 0.5f));
+						_selected = prop;
 						break;
 					}
+				_selected = fnd ? _selected : null;
 				Selector.Highlight.Visible = fnd;
 				Selector.Glass.Visible = fnd;
 			}
@@ -277,6 +307,7 @@ namespace Gale
 
 					var text = TextService.FromFile(Environment.ExpandEnvironmentVariables("%WINDIR%/Fonts/Arial.ttf"), game.Window.RenderWorker);
 					game.Content.Text = text;
+					//game.GUI.Cheat();
 					var ui_scripts = gm.Read<ComplexLS>("UI");
 					foreach (var uisc in ui_scripts.ReadAll<ComplexLS>("ELEMENT"))
 						game.GUI.SpawnUI(uisc);
