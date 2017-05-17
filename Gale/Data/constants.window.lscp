@@ -1,0 +1,5 @@
+WINDOW define$constants.window.default:
+	WIDTH define$constants.window.default.w 1024px
+	HEIGHT define$constants.window.default.h 576px
+	TITLE "Gale Dribble"
+;

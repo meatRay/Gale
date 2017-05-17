@@ -77,7 +77,8 @@ namespace Gale.LScripts.TinyPG
 			if (node.Token.Type == TokenType.NUMBER)
 				return new TokenLS<double>(paramlist[0] as string, double.Parse(node.Token.Text));
 			else if (node.Token.Type == TokenType.QuoteToken)
-				return new TokenLS<string>(paramlist[0] as string, (node.Eval(tree, paramlist) as string).Replace("\\n", "\n"));
+				return new TokenLS<string>(paramlist[0] as string, (node.Eval(tree, paramlist) as string)
+					.Replace("\r","").Replace("\t",""));
 			else if (node.Token.Type == TokenType.PixelToken)
 				return new TokenLS<Pixels>(paramlist[0] as string, new Pixels((int)node.Eval(tree, paramlist)));
 			else if (node.Token.Type == TokenType.NameToken)

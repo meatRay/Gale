@@ -5,30 +5,25 @@ ACTOR def$gale.actor:
 		MOOD:
 			NAME $mood.idle
 			SPRITE: FILENAME "Img/Character/Gale_Dribble.png" ;
-		;
-		MOOD:
-			NAME $mood.happy
-			SPRITE: FILENAME "Img/Character/Gale_Dribble.png" ;
-		;
-	;
+	;	;
 	NAME "Gale Dribble"
+;
+ACTOR def$ayylien.actor:
+	MOODS:
+		MOOD:
+			NAME $mood.idle
+			SPRITE: FILENAME "Img/Character/ayylmao.png" ;
+	;	;
+	NAME "Tol Alien"
 ;
 
 DIALOGUE def$office.friendlychat:
 	LINE:
 		ACTOR $gale.actor
-		TEXT "Hello, World!"
+		TEXT "Woah.  That's certainly... That's a very alien alien."
 		MOOD $mood.idle
 	;
-	LINE:
-		TEXT "Dialogue funny enough was the original
-		purpose of this scripting syntax.
-		Now it doesn't support a lot of the old 
-		shortcuts."
-		MOOD $mood.idle
-	;
-	LINE:
-		FACE_LEFT LOUD_EFFECT
-		TEXT "But there's a bunch of cool new stuff!"
-	;	
+	LINE: ACTOR $ayylien.actor TEXT "Sup'?" ;
+	LINE: ACTOR $gale.actor TEXT "Do you maybe have any mysteries that I could solve?" ;
+	LINE: ACTOR $ayylien.actor TEXT "Nah my friend.  This demo is all for you." ;
 ;

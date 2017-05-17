@@ -29,7 +29,7 @@ namespace Gale.Props
 				return AnimationDirections.West;
 			else if (y == -1)
 				return AnimationDirections.South;
-			else 
+			else
 				return AnimationDirections.East;
 		}
 	}
@@ -52,7 +52,7 @@ namespace Gale.Props
 			: base(template.Image, template.Name, template.Desc, template.Mass, template.Friction, template.Collides, template.CanMove)
 		{
 			Image.AcquireUse();
-			if( Image is Animation animation )
+			if (Image is Animation animation)
 			{
 				isanimated = true;
 				animation.UseSequence("idle", AnimationDirections.South);
@@ -68,7 +68,8 @@ namespace Gale.Props
 			if (Visible)
 			{
 				var pos = GetPosition();
-				render_context.ShaderProgram.Model.Push( Matrix4.CreateTranslation(pos.X, pos.Y, 0.0f) );
+				float rt = Display.ViewTiles / 1024f;
+				render_context.ShaderProgram.Model.Push(Matrix4.CreateTranslation(pos.X, pos.Y, 0.0f));
 				render_context.ShaderProgram.Model.Write();
 				GL.Uniform1(render_context.ShaderProgram.ZLocation, ZPosition);
 				Image.Render(render_context);

@@ -1,0 +1,4 @@
+ENGINE:
+	FILTER define$constants.filter.linear "linear"
+	FILTER define$constants.filter.pixel "pixel"
+;

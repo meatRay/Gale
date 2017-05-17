@@ -56,7 +56,7 @@ namespace Gale.Visuals
 			//Matrix4 model;
 			if (text.Character == '\n')
 			{
-				render.ShaderProgram.Model.Push(_fontscale * Matrix4.CreateTranslation(0, downs_count * -0.35f, 0));
+				render.ShaderProgram.Model.Push(_fontscale * Matrix4.CreateTranslation(0, downs_count * -0.7f, 0));
 				++downs_count;
 			}
 			else
@@ -147,13 +147,49 @@ namespace Gale.Visuals
 			LoadedCharacters = loaded_chars;
 		}
 
-		public TextRender CompileString(string input, Vector2 position, Renderer render_context)
+		public TextRender CompileString(string input, Vector2 position, Renderer render_context, float max_width = -1f)
 		{
 			var chars = input.Where(i => i > 0 && i < 127).ToArray();
-			var glyphs = new GlyphService[chars.Length];
+			var glyphs = new List<GlyphService>();
+			var curword = new List<GlyphService>();
+			float l_length = 0.0f;
+			//var glyphs = new GlyphService[chars.Length];
 			for (int i = 0; i < chars.Length; ++i)
-				glyphs[i] = LoadedCharacters[chars[i]];
-			return new TextRender(position, glyphs);
+			{
+				var glyph = LoadedCharacters[chars[i]];
+				if (max_width > 0.0f)
+				{
+					curword.Add(glyph);
+					l_length += glyph.Next.M41;
+					if (glyph.Character == ' ' || glyph.Character == '\n')
+					{
+						if (l_length >= max_width)
+						{
+							l_length = 0.0f;
+							foreach (var g in curword)
+								l_length += g.Next.M41;
+							glyphs.Add(LoadedCharacters['\n']);
+						}
+						glyphs.AddRange(curword);
+						curword.Clear();
+					}
+				}
+				else
+					glyphs.Add(glyph);
+			}
+			if (curword.Count > 0)
+			{
+				if (l_length >= max_width)
+				{
+					l_length = 0.0f;
+					foreach (var g in curword)
+						l_length += g.Next.M41;
+					glyphs.Add(LoadedCharacters['\n']);
+				}
+				glyphs.AddRange(curword);
+				curword.Clear();
+			}
+			return new TextRender(position, glyphs.ToArray());
 		}
 
 		[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]

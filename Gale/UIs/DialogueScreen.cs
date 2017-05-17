@@ -64,10 +64,13 @@ namespace Gale.UIs
 
 		public void ReloadArt(ContentManager content)
 		{
-
 			Textbox.Children = new IRender[1]
-				{ content.Text.CompileString(CurrentChat.CurrentLine.Text, new OpenTK.Vector2(0.3f,ChatboxHeight-0.35f), content.GameContext.Window.RenderWorker) };
-			((TextRender)Textbox.Children[0]).CalcFontSize(0.35f);
+				{ content.Text.CompileString(
+					CurrentChat.CurrentLine.Text,
+					new OpenTK.Vector2(0.3f,ChatboxHeight-0.7f),
+					content.GameContext.Window.RenderWorker,
+					(UIContext.Context.Content.GameContext.UISize.X - 2.6f) / 0.7f) };
+			((TextRender)Textbox.Children[0]).CalcFontSize(0.7f);
 			UIContext.Elements.Remove(Speaker);
 			Speaker = new UI(CurrentChat.CurrentLine.Voice.Moods[CurrentChat.CurrentLine.Mood]);
 			Speaker.FitTo(UIContext.Context.UISize.X - 2.2f, 0, 2, false);
@@ -130,7 +133,7 @@ namespace Gale.UIs
 				}
 				string text = line.Read<TokenLS<string>>("TEXT") ?? lines.Peek().Text;
 				string mood = line.Read<TokenLS<string>>("MOOD") ?? lines.Peek().Mood;
-				lines.Push(new Line(text.Replace("\r","").Replace("\t",""), actor, mood));
+				lines.Push(new Line(text, actor, mood));
 			}
 			return new Dialogue(lines.Reverse().ToArray());
 		}

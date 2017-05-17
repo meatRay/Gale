@@ -1,5 +1,6 @@
-#IMPORT "Data/constants.lscp"
 #IMPORT "Data/ui.lscp"
+#IMPORT "Data/constants.engine.lscp"
+#IMPORT "Data/constants.window.lscp"
 
 GAME:
 	LOADLEVEL "Data/Office/room.lscp"
@@ -17,12 +18,9 @@ GAME:
 		;
 	;
 	CONSTANTS:
-		WINDOW:
-			WIDTH 1024px HEIGHT 576px
-			TITLE "Gale Dribble"
-		;
-		TILESIZE 64px
-		VIEWTILES 12.0
+		WINDOW $constants.window.default
+		TILESIZE 128px
+		VIEWTILES 14.0
 		FILTER $constants.filter.linear
 	;
 ;

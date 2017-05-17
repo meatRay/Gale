@@ -39,8 +39,7 @@ ROOM:
 		PROP:
 			TEMPLATE $office.crate.template X 0.16 Y 6.80 
 			ON_INTERACT:
-				WRITE: TEXT "It's full of space-junk from when you
-				space-moved here a couple space-years ago." FOR 5.0 ;
+				WRITE: TEXT "It's full of space-junk from when you space-moved here a couple space-years ago." FOR 5.0 ;
 			;
 		;
 		// door trigger 1
@@ -79,8 +78,7 @@ ROOM:
 			ON_INTERACT:
 				RANDOM:
 					WRITE: TEXT "A classic trilogy of well-worn books by Oolon Colluphid." FOR 4.0 ;
-					WRITE: TEXT "An incomplete set of Sherlock Holmes.
-					The quality and print dates vary wildly." FOR 4.0 ;
+					WRITE: TEXT "An incomplete set of Sherlock Holmes. The quality and print dates vary wildly." FOR 4.0 ;
 				;
 			;
 		;
@@ -90,8 +88,7 @@ ROOM:
 		PROP: 
 			TEMPLATE $office.bed.template X 8.44 Y 10.31  
 			ON_INTERACT: 
-				WRITE: TEXT "It's officially space-lunch o'clock!
-				Far too late for yet another nap." FOR 4.0 ; 
+				WRITE: TEXT "It's officially space-lunch o'clock! Far too late for yet another nap." FOR 4.0 ; 
 			;
 		;
 		// button

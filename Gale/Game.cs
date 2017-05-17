@@ -60,9 +60,9 @@ namespace Gale
 			if (step.Word == "WRITE" && step is ComplexLS write)
 			{
 				GUI.Studyline = Content.Text.CompileString(write.ReadToken<string>("TEXT"),
-					new Vector2(0.1f, 0.65f), Window.RenderWorker);
+					new Vector2(0.1f, 0.65f), Window.RenderWorker, UISize.X/0.7f);
 				GUI.Studybox.Children[0] = GUI.Studyline;
-				GUI.Studyline.CalcFontSize(0.35f);
+				GUI.Studyline.CalcFontSize(0.7f);
 				GUI.DisplayStudy(true, time: write.ReadToken<double>("FOR"));
 			}
 			else if (step.Word == "WAIT" && step is TokenLS<double> time)
@@ -189,6 +189,26 @@ namespace Gale
 		double waiting_time = 0.0;
 		public void Update(object sender, FrameEventArgs e)
 		{
+			if( investigatemode )
+			{
+				if (Display.ViewTiles < 12.0f)
+				{
+					Display.ViewTiles += (float)e.Time * 4.0f;
+					Window.RenderWorker.RebuildGameProjection();
+				}
+				else
+					Display.ViewTiles = 12.0f;
+			}
+			else
+			{
+				if (Display.ViewTiles > 8.0f)
+				{
+					Display.ViewTiles -= (float)e.Time * 4.0f;
+					Window.RenderWorker.RebuildGameProjection();
+				}
+				else
+					Display.ViewTiles = 8.0f;
+			}
 			if (waiting_time > 0.0)
 				waiting_time -= e.Time;
 			else if (triggers.Count > 0)

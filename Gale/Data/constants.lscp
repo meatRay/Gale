@@ -1,7 +1,4 @@
 CONSTANTS:
 	MOOD define$mood.idle "idle"
 	MOOD define$mood.happy "happy"
-
-	FILTER define$constants.filter.linear "linear"
-	FILTER define$constants.filter.pixel "pixel"
 ;

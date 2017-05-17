@@ -52,18 +52,24 @@ namespace Gale
 				if (suic.Word == "ELEMENT")
 					uis.Add(MakeUI(suic as ComplexLS));
 				else if (suic.Word == "TEXT")
-					uis.Add(MakeText(suic as ComplexLS));
+					uis.Add(MakeText(suic as ComplexLS, right - left, 0.7f));
 			}
 			ui.Children = uis.ToArray();
 			if (id != null)
 				AssignUI(ui, id);
 			return ui;
 		}
-		public TextRender MakeText(ComplexLS text_script)
+		public TextRender MakeText(ComplexLS text_script, float line_length, float font_size)
 		{
 			float x = (float)text_script.ReadToken<double>("X");
 			float y = (float)text_script.ReadToken<double>("Y");
-			return Context.Content.Text.CompileString(text_script.ReadToken<string>("LINE"), new Vector2(x, y), Context.Window.RenderWorker);
+			var str = Context.Content.Text.CompileString(
+				text_script.ReadToken<string>("LINE"),
+				new Vector2(x, y),
+				Context.Window.RenderWorker,
+				line_length / font_size);
+			str.CalcFontSize(font_size);
+			return str;
 		}
 		private void AssignUI(UI ui, string to)
 		{

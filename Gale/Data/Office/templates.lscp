@@ -31,26 +31,26 @@ TEMPLATE def$office.chair.template:
 		SEQUENCE:
 			NAME $animation.idle
 			DIRECTIONS: SOUTH ;
-			WIDTH 43px HEIGHT 91px OFFSET: X -1px ;
+			WIDTH 86px HEIGHT 182px OFFSET: X -1px ;
 			STEP: X 0px Y 0px  ;
 		;
 		SEQUENCE:
 			NAME $animation.idle
 			DIRECTIONS: EAST ;
-			WIDTH 43px HEIGHT 91px OFFSET: X -1px ;
-			STEP: X 43px Y 91px ;
+			WIDTH 86px HEIGHT 182px OFFSET: X -1px ;
+			STEP: X 43px Y 182px ;
 		;
 		SEQUENCE:
 			NAME $animation.idle
 			DIRECTIONS: NORTH ;
-			WIDTH 43px HEIGHT 91px OFFSET: X -1px ;
-			STEP: X 0px Y 91px ;
+			WIDTH 86px HEIGHT 182px OFFSET: X -1px ;
+			STEP: X 0px Y 182px ;
 		;
 		SEQUENCE:
 			NAME $animation.idle
 			DIRECTIONS: WEST ;
-			WIDTH 43px HEIGHT 91px OFFSET: X -1px ;
-			STEP: X 43px Y 0px ;
+			WIDTH 86px HEIGHT 182px OFFSET: X -1px ;
+			STEP: X 86px Y 0px ;
 		;
 	;
 	MASS 0.2 CANMOVE COLLIDES FRICTION 0.5
